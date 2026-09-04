@@ -3112,6 +3112,20 @@ function sanitizeState(s) {
      chính mình bấm bắt đầu, không bị thiệt thời gian nếu vào trễ do lag
      mạng hay do vào sau bạn khác. */
   if (!s.classTestMyStarts || typeof s.classTestMyStarts !== "object") s.classTestMyStarts = {};
+  /* THÊM MỚI: thứ tự hiển thị từ vựng CÁ NHÂN cho mỗi phiên Kiểm Tra Trên
+     Lớp (key = sessionId, value = mảng wordId theo thứ tự đã xáo trộn
+     riêng cho học sinh này). Giống hệt cơ chế classTestMyStarts ở trên —
+     lưu ở CẤP GỐC của state, KHÔNG nằm trong SHARED_FIELDS, nên chỉ lưu
+     cục bộ trên MÁY của từng học sinh, không đồng bộ/ghi đè giữa các học
+     sinh khác nhau. Mỗi học sinh bấm "Bắt Đầu Làm Bài" sẽ được xáo 1 thứ
+     tự ngẫu nhiên riêng, sinh đúng 1 lần rồi giữ nguyên tới khi nộp bài
+     (kể cả reload lại trang) để không bị xáo lại giữa chừng gây khó chịu.
+     Mỗi lần giáo viên mở phiên kiểm tra MỚI (sessionId mới) thì học sinh
+     bấm bắt đầu lại sẽ được xáo 1 thứ tự mới hoàn toàn. Việc thêm field
+     này KHÔNG đổi/xóa field nào cũ, và thứ tự nộp bài (submitClassTest)
+     vẫn luôn duyệt theo list.words gốc (không phụ thuộc thứ tự hiển thị)
+     nên không ảnh hưởng gì tới việc chấm điểm/ghi nhận bài nộp. */
+  if (!s.classTestMyOrder || typeof s.classTestMyOrder !== "object") s.classTestMyOrder = {};
 
   if (!s.classes || typeof s.classes !== "object") s.classes = {};
   /* FIX QUAN TRỌNG: đây chính là nguyên nhân lớp "Lớp HSK 2 - Ca Tối"
@@ -10045,6 +10059,15 @@ function renderClassTestStudent() {
          sinh đang bấm — tránh ghi đè mốc bắt đầu đã có bằng 1 mốc mới. */
       if (!state.classTestMyStarts[active.sessionId]) {
         state.classTestMyStarts[active.sessionId] = Date.now();
+        /* THÊM MỚI: sinh thứ tự hiển thị từ vựng ngẫu nhiên CÁ NHÂN cho
+           đúng phiên kiểm tra này, y hệt cách ghi mốc bắt đầu ở trên —
+           chỉ sinh khi CHƯA có (tránh xáo lại nếu vì lý do gì đó nút bị
+           bấm/hàm bị gọi nhiều lần). Dùng hàm shuffle(arr) đã có sẵn
+           trong app (Fisher-Yates), chỉ lưu lại DANH SÁCH wordId theo
+           thứ tự mới — không đụng gì tới list.words gốc trên server. */
+        if (!state.classTestMyOrder[active.sessionId]) {
+          state.classTestMyOrder[active.sessionId] = shuffle(list.words.map(w => w.id));
+        }
         saveState();
       }
       renderClassTestStudent();
@@ -10053,6 +10076,31 @@ function renderClassTestStudent() {
   }
 
   const deadline = myStart + (active.durationMinutes || 15) * 60000;
+
+  /* THÊM MỚI: lấy thứ tự đã xáo riêng cho học sinh này (đã sinh 1 lần
+     lúc bấm "Bắt Đầu Làm Bài" ở trên). Nếu vì lý do hiếm gặp nào đó chưa
+     có (vd: dữ liệu cũ từ trước khi có tính năng này, hoặc bị xóa giữa
+     chừng) thì sinh bù ngay tại đây và lưu lại, để KHÔNG BAO GIỜ rơi về
+     lại thứ tự gốc giống nhau cho mọi học sinh. displayWords chỉ dùng để
+     RENDER giao diện — mảng list.words gốc và toàn bộ logic nộp bài
+     (submitClassTest) vẫn giữ nguyên, không bị ảnh hưởng. */
+  let myOrder = state.classTestMyOrder[active.sessionId];
+  if (!Array.isArray(myOrder) || myOrder.length !== list.words.length) {
+    myOrder = shuffle(list.words.map(w => w.id));
+    state.classTestMyOrder[active.sessionId] = myOrder;
+    saveState();
+  }
+  const wordById = {};
+  list.words.forEach(w => { wordById[w.id] = w; });
+  const displayWords = myOrder.map(id => wordById[id]).filter(Boolean);
+  /* Phòng trường hợp lệch dữ liệu (vd giáo viên sửa list sau khi học
+     sinh đã có thứ tự cũ) khiến displayWords thiếu từ so với list.words
+     gốc -> bổ sung nốt các từ còn thiếu vào cuối, đảm bảo học sinh luôn
+     thấy ĐỦ toàn bộ từ cần làm, không bị mất câu hỏi nào. */
+  if (displayWords.length !== list.words.length) {
+    const shownIds = new Set(displayWords.map(w => w.id));
+    list.words.forEach(w => { if (!shownIds.has(w.id)) displayWords.push(w); });
+  }
 
   area.innerHTML = `
     <div style="background:#fffdf4; border:2px solid var(--jade); border-radius:18px; padding:14px 16px; margin-bottom:16px;">
@@ -10067,7 +10115,7 @@ function renderClassTestStudent() {
   `;
 
   const wordsArea = document.getElementById("classtest-words-area");
-  list.words.forEach((w, idx) => {
+  displayWords.forEach((w, idx) => {
     const card = document.createElement("div");
     card.style.cssText = "background:var(--card-bg); border:2px solid var(--paper-darker); border-radius:16px; padding:14px; margin-bottom:10px; display:flex; gap:14px; align-items:center; flex-wrap:wrap;";
     card.innerHTML = `
