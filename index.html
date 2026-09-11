@@ -410,11 +410,75 @@
   .gh-xp-track{ width:120px; height:12px; background:var(--paper-darker); border-radius:999px; overflow:hidden; border:1px solid var(--jade); position:relative; }
   .gh-xp-fill{ height:100%; background:linear-gradient(90deg, var(--accent), var(--jade-dark)); transition:width 0.3s var(--ease); border-radius:999px; }
 
-  /* Announcement Banner */
+  /* Announcement Banner — Honor Plaque (Bảng Vàng Vinh Danh) redesign */
   .teacher-announcement-banner{
-    background:linear-gradient(135deg,#FFFDF0,#FFF8DC); border:1px solid #F0CC5A; border-radius:var(--radius); padding:12px 18px; margin:14px auto 0; max-width:860px; font-size:13px; color:#5D4037; font-weight:700; display:flex; align-items:center; gap:10px; box-shadow:0 4px 14px rgba(251,192,45,0.14); text-align:left;
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:14px;
+    margin:14px auto 0; max-width:860px; padding:12px 18px 12px 12px;
+    border-radius:var(--radius-lg);
+    background:linear-gradient(135deg,#FFFDF3,#FFF3D6 55%,#FFEAB0);
+    border:1px solid #E8C766;
+    box-shadow:0 6px 18px rgba(212,175,55,0.18), inset 0 0 0 1px rgba(255,255,255,0.65);
+    animation: banner-glow-pulse 3s ease-in-out infinite;
   }
-  body.theme-dark .teacher-announcement-banner{ background:linear-gradient(135deg,#2E2810,#241F0D); border-color:#9E821B; color:#FFF59D; }
+  body.theme-dark .teacher-announcement-banner{
+    background:linear-gradient(135deg,#241F0D,#1B170A 55%,#171307);
+    border-color:#8A6D1E;
+    box-shadow:0 6px 18px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05);
+    animation: banner-glow-pulse-dark 3s ease-in-out infinite;
+  }
+  /* Diagonal shine sweep for a "lung linh" premium feel */
+  .teacher-announcement-banner::before{
+    content:""; position:absolute; top:0; left:-60%; width:35%; height:100%;
+    background:linear-gradient(115deg, transparent, rgba(255,255,255,0.65), transparent);
+    transform:skewX(-20deg); pointer-events:none; animation: ta-shine 5s ease-in-out infinite;
+  }
+  body.theme-dark .teacher-announcement-banner::before{
+    background:linear-gradient(115deg, transparent, rgba(255,224,130,0.20), transparent);
+  }
+  @keyframes ta-shine{
+    0%{ left:-60%; } 30%{ left:130%; } 100%{ left:130%; }
+  }
+  /* Trophy badge */
+  .ta-badge{
+    position:relative; z-index:1; flex-shrink:0; width:42px; height:42px; border-radius:13px;
+    display:flex; align-items:center; justify-content:center; font-size:21px;
+    background:linear-gradient(135deg,#FFE680,#D4AF37); border:2px solid #fff;
+    box-shadow:0 3px 10px rgba(184,134,11,0.4), inset 0 1px 1px rgba(255,255,255,0.7);
+    animation: ta-badge-bob 2.6s ease-in-out infinite;
+  }
+  body.theme-dark .ta-badge{ border-color:#3A3216; box-shadow:0 3px 10px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.25); }
+  @keyframes ta-badge-bob{
+    0%,100%{ transform:translateY(0) rotate(-4deg); }
+    50%{ transform:translateY(-3px) rotate(4deg); }
+  }
+  .ta-body{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:flex-start; gap:5px; min-width:0; flex:1; text-align:left; }
+  .teacher-announcement-label{
+    font-family:var(--serif); font-size:10.5px; font-weight:900; letter-spacing:1.2px; text-transform:uppercase;
+    color:#6B4A00; background:linear-gradient(135deg,#FFF3B0,#FFD700);
+    padding:3px 11px; border-radius:999px; border:1px solid #E8C766; white-space:nowrap;
+    box-shadow:0 1px 3px rgba(184,134,11,0.25);
+  }
+  body.theme-dark .teacher-announcement-label{
+    color:#3A2A00; background:linear-gradient(135deg,#FFE082,#D4AF37); border-color:#8A6D1E;
+  }
+  #announcement-banner-text{
+    font-size:13.5px; font-weight:700; color:#5D4037; white-space:pre-wrap; word-break:break-word; line-height:1.45;
+  }
+  body.theme-dark #announcement-banner-text{ color:#FFF3D0; }
+  @keyframes banner-glow-pulse{
+    0%,100%{ box-shadow:0 6px 18px rgba(212,175,55,0.18), inset 0 0 0 1px rgba(255,255,255,0.65), 0 0 0 rgba(255,215,0,0); }
+    50%{ box-shadow:0 6px 24px rgba(212,175,55,0.4), inset 0 0 0 1px rgba(255,255,255,0.65), 0 0 18px rgba(255,215,0,0.4); }
+  }
+  @keyframes banner-glow-pulse-dark{
+    0%,100%{ box-shadow:0 6px 18px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.05), 0 0 0 rgba(255,238,88,0); }
+    50%{ box-shadow:0 6px 24px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.05), 0 0 18px rgba(255,238,88,0.3); }
+  }
+  @media (max-width:520px){
+    .teacher-announcement-banner{ padding:10px 14px 10px 10px; gap:10px; }
+    .ta-badge{ width:36px; height:36px; font-size:18px; border-radius:11px; }
+    #announcement-banner-text{ font-size:12.5px; }
+  }
+
 
   /* Tabs — sticky, scroll-friendly nav, modern icon-tile style */
   nav.tabs{
@@ -886,6 +950,51 @@
   .lb-row-pending-tribulation.lb-lvl-aura-6 strong,
   .lb-row-pending-tribulation.lb-lvl-aura-7 strong{
     color:var(--seal-dark) !important;
+  }
+  /* FIX: dòng "Trạng thái: ..." và cột XP/Trúc bên phải KHÔNG nằm trong thẻ
+     <strong> nên không được bản vá trên bảo vệ — khi rơi vào Top 1-3 (nền
+     lửa cam) hoặc hào quang Level (nền sáng), 2 phần này vẫn bị nền SÁNG đè
+     lên trong khi màu chữ tím nhạt #E1D5FF (thiết kế riêng cho nền tím than)
+     gần như không đọc được, y hệt lỗi đã vá ở tên học viên. Trả các phần
+     này về màu đọc rõ trên nền sáng (tím đậm cho dòng Trạng thái để vẫn giữ
+     đúng "nhận diện" riêng của Chờ Độ Kiếp, seal-dark/jade-dark cho XP/Trúc
+     giống hệt màu mặc định bình thường) — mọi hiệu ứng, nền, viền, animation
+     khác giữ nguyên 100% không đổi. */
+  .lb-row-pending-tribulation.lb-rank-1 .lb-pending-status-text,
+  .lb-row-pending-tribulation.lb-rank-2 .lb-pending-status-text,
+  .lb-row-pending-tribulation.lb-rank-3 .lb-pending-status-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-1 .lb-pending-status-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-2 .lb-pending-status-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-3 .lb-pending-status-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-4 .lb-pending-status-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-5 .lb-pending-status-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-6 .lb-pending-status-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-7 .lb-pending-status-text{
+    color:#4A148C !important;
+  }
+  .lb-row-pending-tribulation.lb-rank-1 .lb-pending-xp-text,
+  .lb-row-pending-tribulation.lb-rank-2 .lb-pending-xp-text,
+  .lb-row-pending-tribulation.lb-rank-3 .lb-pending-xp-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-1 .lb-pending-xp-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-2 .lb-pending-xp-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-3 .lb-pending-xp-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-4 .lb-pending-xp-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-5 .lb-pending-xp-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-6 .lb-pending-xp-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-7 .lb-pending-xp-text{
+    color:var(--seal-dark) !important;
+  }
+  .lb-row-pending-tribulation.lb-rank-1 .lb-pending-truc-text,
+  .lb-row-pending-tribulation.lb-rank-2 .lb-pending-truc-text,
+  .lb-row-pending-tribulation.lb-rank-3 .lb-pending-truc-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-1 .lb-pending-truc-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-2 .lb-pending-truc-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-3 .lb-pending-truc-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-4 .lb-pending-truc-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-5 .lb-pending-truc-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-6 .lb-pending-truc-text,
+  .lb-row-pending-tribulation.lb-lvl-aura-7 .lb-pending-truc-text{
+    color:var(--jade-dark) !important;
   }
   .lb-row-pending-tribulation::after{ content:""; position:absolute; top:0; left:-60%; width:35%; height:100%; background:linear-gradient(120deg, transparent, rgba(0,229,255,0.55), transparent); animation:badgeSparkleSweep 1.5s linear infinite; pointer-events:none; }
   .lb-row-pending-tribulation::before{ content:"⛈️"; position:absolute; top:2px; right:8px; font-size:18px; z-index:2; pointer-events:none; animation:tribBoltFlicker 0.7s steps(2,end) infinite; }
@@ -1541,8 +1650,11 @@
 
   <!-- PINNED TEACHER ANNOUNCEMENT BANNER -->
   <div class="teacher-announcement-banner">
-    <span>📢 Dặn Dò Lớp Học:</span>
-    <span id="announcement-banner-text" style="flex:1;">Chào mừng các em đến với lớp học Tiếng Trung Gamification! Cùng thi đua làm bài tập tích Trúc nuôi Gấu nào 🐼🎋</span>
+    <div class="ta-badge" aria-hidden="true">🏆</div>
+    <div class="ta-body">
+      <span class="teacher-announcement-label">Bảng Vàng Vinh Danh</span>
+      <span id="announcement-banner-text">Chào mừng các em đến với lớp học Tiếng Trung Gamification! Cùng thi đua làm bài tập tích Trúc nuôi Gấu nào 🐼🎋</span>
+    </div>
   </div>
 </header>
 
@@ -3096,6 +3208,24 @@ function ensureClassTestDefaults(cData) {
       hidePinyin: false, durationMinutes: 15, startedAt: null, closed: false
     };
   }
+  /* FIX (từ bị xóa trong List Kiểm Tra "hồi sinh" sau khi đồng bộ): các
+     field dưới đây (deletedListIds/deletedWordIds/updatedAt) là dữ liệu
+     "tombstone" (đánh dấu thời điểm xóa) + mốc thời gian sửa đổi gần nhất,
+     dùng để HỢP NHẤT (merge) đúng dữ liệu classTest giữa nhiều thiết bị
+     thay vì ghi đè nguyên cục — xem mergeClassTestForClass_() phía dưới.
+     Điền giá trị mặc định an toàn (object rỗng / 0) cho dữ liệu CŨ chưa
+     từng có các field này, không đổi bất kỳ dữ liệu hiện có nào. */
+  if (!cData.classTest.deletedListIds || typeof cData.classTest.deletedListIds !== "object") {
+    cData.classTest.deletedListIds = {};
+  }
+  if (typeof cData.classTest.active.updatedAt !== "number") cData.classTest.active.updatedAt = 0;
+  cData.classTest.lists.forEach(list => {
+    if (!list || typeof list !== "object") return;
+    if (!Array.isArray(list.words)) list.words = [];
+    if (!list.deletedWordIds || typeof list.deletedWordIds !== "object") list.deletedWordIds = {};
+    if (typeof list.createdAt !== "number") list.createdAt = 0;
+    list.words.forEach(w => { if (w && typeof w.updatedAt !== "number") w.updatedAt = 0; });
+  });
   if (!Array.isArray(cData.classTest.submissions)) cData.classTest.submissions = [];
 }
 
@@ -3555,6 +3685,51 @@ function describeServerError(res) {
 let _progressSyncTimer = null;      // cờ boolean: đang có lượt lưu dang dở (từ lúc lên lịch tới khi có phản hồi)
 let _progressSyncTimeoutId_ = null; // id thực của setTimeout, chỉ dùng để clearTimeout
 
+/* FIX (Trúc hiển thị lệch vĩnh viễn giữa các thiết bị, KHÁC lỗi overload
+   đã vá ở mục 04/09 trong file .sql): _progressSyncTimer chỉ được đưa về
+   null trong .finally() của request save_progress — tức PHẢI chờ request
+   đó thực sự có phản hồi (thành công hay lỗi đều được). Nếu thiết bị di
+   động bị hệ điều hành ĐÌNH CHỈ đúng lúc request đang bay (rất hay gặp
+   khi khoá màn hình / chuyển app nền / để qua đêm), request có thể KHÔNG
+   BAO GIỜ resolve — cờ bị kẹt ở true VĨNH VIỄN. Từ lúc đó, mọi lượt poll
+   (pollOwnProgressFromServer chạy mỗi 8s + mỗi khi mở lại app) đều thấy
+   cờ bật nên tự bỏ qua, không bao giờ kéo lại Trúc/Level mới nhất từ
+   server nữa — biểu hiện ra ngoài đúng như báo cáo: thiết bị A vừa tiêu
+   hết Trúc trên máy chủ, thiết bị B vẫn hiển thị số Trúc CŨ dù mở lại
+   nhiều lần, khiến học viên tưởng lầm mình còn Trúc để tiêu tiếp (số Trúc
+   THẬT trên server không hề sai — server vẫn cộng dồn đúng theo delta,
+   chỉ là màn hình thiết bị B báo sai).
+   FIX: dùng 3 hàm dưới đây thay cho việc gán/đọc trực tiếp biến
+   _progressSyncTimer ở mọi nơi trong file — mỗi lần bật cờ đều ghi lại
+   thời điểm bật (_progressSyncTimerSetAt); mỗi lần ĐỌC cờ (isSavePending)
+   nếu phát hiện cờ đã bật quá SAVE_PENDING_TIMEOUT_MS mà chưa được clear
+   (một lượt save_progress bình thường chỉ mất vài trăm ms tới vài giây,
+   nên bật quá lâu chắc chắn là request cũ đã "chết" chứ không phải đang
+   chạy bình thường) thì TỰ ĐỘNG coi như hết pending và giải phóng, để
+   lần poll kế tiếp (hoặc ngay lượt gọi isSavePending() này) được chạy
+   tiếp — không bao giờ kẹt quá 25s nữa. Hành vi bình thường (khi request
+   save_progress vẫn đang chạy đúng trong vài giây đầu, poll vẫn bị chặn
+   y hệt như trước để tránh đè dữ liệu) KHÔNG đổi, nên không ảnh hưởng cơ
+   chế chống "Trúc nhảy lên rồi tụt về cũ" đã vá trước đó. */
+let _progressSyncTimerSetAt = null;
+const SAVE_PENDING_TIMEOUT_MS = 25000; // 1 lượt save_progress bình thường chỉ mất < vài giây, 25s là dư sức an toàn
+function markSavePending() {
+  _progressSyncTimer = true;
+  _progressSyncTimerSetAt = Date.now();
+}
+function clearSavePending() {
+  _progressSyncTimer = null;
+  _progressSyncTimerSetAt = null;
+}
+function isSavePending() {
+  if (_progressSyncTimer && _progressSyncTimerSetAt && (Date.now() - _progressSyncTimerSetAt > SAVE_PENDING_TIMEOUT_MS)) {
+    console.warn("isSavePending: cờ pending-save bị kẹt quá " + SAVE_PENDING_TIMEOUT_MS + "ms (request trước có thể đã bị hệ điều hành đình chỉ giữa chừng, không bao giờ resolve) — tự động giải phóng để tiếp tục đồng bộ Trúc/XP từ máy chủ.");
+    clearSavePending();
+    return false;
+  }
+  return !!_progressSyncTimer;
+}
+
 /* FIX QUAN TRỌNG: bản vá save_progress trước đây (thêm p_baseline_pouch để
    server tự CỘNG DỒN delta thay vì GHI ĐÈ toàn bộ, tránh mất Trúc khi giáo
    viên vừa cộng đúng lúc học viên đang lưu tiến trình) đã được viết ở phía
@@ -3601,7 +3776,7 @@ function captureServerBaseline_() {
    nhánh debounce bình thường LẪN nhánh "gửi ngay không chờ" bên dưới).
    Tách riêng ra để 2 nhánh không lặp lại logic hoà giải baseline. */
 function doPushProgressNow_() {
-  _progressSyncTimer = true;
+  markSavePending();
   return callServer("save_progress", {
     username: state.username,
     progress: captureCurrentProgress(),
@@ -3637,7 +3812,7 @@ function doPushProgressNow_() {
   }).finally(() => {
     /* Chỉ mở khoá poll SAU KHI request đã có kết quả (thành công hay
        thất bại đều mở, để không khoá poll vĩnh viễn nếu mất mạng). */
-    _progressSyncTimer = null;
+    clearSavePending();
   });
 }
 
@@ -3659,7 +3834,7 @@ function pushProgressToServer() {
      đó". Giờ chỉ mở khoá poll SAU KHI request đã thực sự hoàn tất (dù
      thành công hay thất bại), đảm bảo poll không bao giờ xen vào giữa
      lúc save_progress đang trên đường tới server. */
-  _progressSyncTimer = true;
+  markSavePending();
   _progressSyncTimeoutId_ = setTimeout(() => {
     doPushProgressNow_();
   }, 1500);
@@ -3822,6 +3997,165 @@ function mergeClassFeeds(localFeeds, remoteFeeds) {
   return merged;
 }
 
+/* =========================================================
+   FIX (bug báo cáo: giáo viên xóa 1 từ trong List "Kiểm Tra Trên Lớp",
+   nhưng sau đó vào lại thấy từ đó hiện lại, và học sinh làm bài vẫn thấy
+   từ đã xóa) — xem giải thích đầy đủ ở applySharedConfig() bên dưới.
+
+   NGUYÊN NHÂN: field "classes" (chứa TOÀN BỘ dữ liệu lớp, trong đó có
+   classTest.lists) nằm trong SHARED_FIELDS và trước đây được GHI ĐÈ
+   NGUYÊN CỤC mỗi khi đồng bộ (state[f] = c[f]) — y hệt cách cũ, SAI, đã
+   từng gây lỗi tương tự cho "classFeeds" (nay đã có mergeClassFeeds() để
+   sửa) nhưng "classes" thì chưa từng được vá.
+   Kịch bản cụ thể: giáo viên xóa 1 từ (đẩy lên server thành công) —
+   nhưng ĐÚNG lúc đó có HỌC SINH đang làm bài kiểm tra, máy học sinh đó
+   chưa kịp nhận bản cập nhật qua vòng poll (8 giây/lần). Khi học sinh này
+   nộp bài, submitClassTest() gọi pushSharedConfigNow() — đẩy lên server
+   TOÀN BỘ bản "classes" đang có trên máy học sinh, vẫn còn nguyên từ vừa
+   bị giáo viên xóa → ghi đè mất luôn thay đổi của giáo viên → từ "hồi
+   sinh" cho TẤT CẢ mọi người (kể cả khi giáo viên tải lại trang).
+
+   CÁCH SỬA: CHỈ hợp nhất (merge) riêng phần "classTest" của từng lớp theo
+   TỪNG MỤC (từng List/từng từ/từng bài nộp), dựa trên tombstone
+   (deletedListIds/deletedWordIds, đánh dấu THỜI ĐIỂM XÓA) so với
+   "updatedAt" (thời điểm sửa/thêm gần nhất) — giống nguyên tắc "ai làm
+   SAU (theo thời gian thật) thì thắng", KHÔNG PHẢI "ai LƯU SAU (do may
+   rủi mạng/thiết bị) thì thắng" như cách cũ. Mọi field KHÁC của "classes"
+   (video, từ vựng riêng, cấu hình thưởng, ngữ pháp, mật khẩu lớp...) vẫn
+   GIỮ NGUYÊN cách đồng bộ cũ (lấy theo bản mới nhận từ server) — KHÔNG
+   đụng tới, để không ảnh hưởng các tính năng khác của app.
+
+   Cơ chế này còn tự "chữa lành" (self-heal): nếu server chẳng may bị ghi
+   đè sai (như kịch bản trên), thì ở lượt poll KẾ TIẾP của BẤT KỲ thiết bị
+   nào còn giữ đúng tombstone/updatedAt mới hơn (vd chính máy giáo viên),
+   applySharedConfig() sẽ merge ra đúng kết quả (từ vẫn bị xóa) rồi
+   saveState() (đã có sẵn ngay sau applySharedConfig(), xem
+   syncSharedConfigFromServer()) sẽ tự đẩy bản ĐÚNG này lên server, sửa
+   luôn dữ liệu server trong vòng ~8 giây kế tiếp — không cần thao tác
+   thêm từ giáo viên.
+   ========================================================= */
+
+/* Hợp nhất 2 map tombstone { id: thờiĐiểmXóa } — với mỗi id, giữ mốc thời
+   gian LỚN HƠN (lần xóa gần nhất được ghi nhận, dù xóa ở thiết bị nào). */
+function mergeWordTombstones_(localMap, remoteMap) {
+  const merged = {};
+  const l = (localMap && typeof localMap === "object") ? localMap : {};
+  const r = (remoteMap && typeof remoteMap === "object") ? remoteMap : {};
+  new Set([...Object.keys(l), ...Object.keys(r)]).forEach(id => {
+    merged[id] = Math.max(Number(l[id]) || 0, Number(r[id]) || 0);
+  });
+  return merged;
+}
+
+/* Hợp nhất danh sách từ (words) + tombstone (deletedWordIds) của CÙNG 1
+   List (đã khớp theo list.id) giữa bản cục bộ và bản vừa nhận từ server.
+   Quy tắc cho mỗi từ (khớp theo word.id):
+   - Nếu chỉ có ở 1 bên -> giữ nguyên (chưa kịp đồng bộ, không phải xung
+     đột thật).
+   - Nếu có ở cả 2 bên (bị sửa khác nhau) -> giữ bản có "updatedAt" LỚN
+     HƠN (sửa sau thì thắng).
+   - Sau khi có danh sách từ gộp, loại bỏ những từ có tombstone xóa
+     (deletedWordIds[id]) với thời điểm >= updatedAt của chính từ đó ->
+     nghĩa là lần XÓA diễn ra SAU (hoặc cùng lúc) lần sửa gần nhất -> xóa
+     thắng. Nếu từ được SỬA lại sau khi đã có tombstone (updatedAt mới hơn
+     thời điểm xóa) -> coi như "khôi phục", giữ lại từ đó. */
+function mergeClassTestListWords_(localList, remoteList) {
+  const deletedWordIds = mergeWordTombstones_(
+    localList && localList.deletedWordIds,
+    remoteList && remoteList.deletedWordIds
+  );
+  const wordMap = new Map();
+  ((remoteList && remoteList.words) || []).forEach(w => { if (w && w.id) wordMap.set(w.id, w); });
+  ((localList && localList.words) || []).forEach(w => {
+    if (!w || !w.id) return;
+    const existing = wordMap.get(w.id);
+    if (!existing || (Number(w.updatedAt) || 0) >= (Number(existing.updatedAt) || 0)) {
+      wordMap.set(w.id, w);
+    }
+  });
+  const words = Array.from(wordMap.values()).filter(w => {
+    const delTs = deletedWordIds[w.id] || 0;
+    return (Number(w.updatedAt) || 0) > delTs;
+  });
+  return { words, deletedWordIds };
+}
+
+/* Hợp nhất TOÀN BỘ phần classTest (lists/active/submissions/deletedListIds)
+   của 1 lớp cụ thể, giữa bản cục bộ (localCT) và bản vừa nhận từ server
+   (remoteCT). Quy tắc cho từng List (khớp theo list.id) giống hệt cách xử
+   lý từ ở trên: List có tombstone (deletedListIds) với thời điểm >= hoạt
+   động gần nhất của chính List đó (thêm/sửa/xóa từ bên trong) -> List đó
+   bị loại; nếu List có hoạt động MỚI HƠN thời điểm xóa -> List được giữ
+   lại (khôi phục). */
+function mergeClassTestForClass_(localCT, remoteCT) {
+  const l = (localCT && typeof localCT === "object") ? localCT : {};
+  const r = (remoteCT && typeof remoteCT === "object") ? remoteCT : {};
+
+  const deletedListIds = mergeWordTombstones_(l.deletedListIds, r.deletedListIds);
+
+  const listMap = new Map();
+  (Array.isArray(r.lists) ? r.lists : []).forEach(list => { if (list && list.id) listMap.set(list.id, list); });
+  (Array.isArray(l.lists) ? l.lists : []).forEach(list => {
+    if (!list || !list.id) return;
+    const existing = listMap.get(list.id);
+    if (!existing) { listMap.set(list.id, list); return; }
+    const { words, deletedWordIds } = mergeClassTestListWords_(list, existing);
+    listMap.set(list.id, Object.assign({}, existing, { words, deletedWordIds }));
+  });
+
+  const lists = Array.from(listMap.values()).filter(list => {
+    const delTs = deletedListIds[list.id] || 0;
+    if (!delTs) return true;
+    const lastActivity = (list.words || []).reduce(
+      (mx, w) => Math.max(mx, Number(w && w.updatedAt) || 0),
+      Number(list.createdAt) || 0
+    );
+    return lastActivity > delTs;
+  });
+
+  /* Bài nộp (submissions) là dữ liệu CHỈ THÊM MỚI (không bao giờ sửa/xóa
+     sau khi nộp) -> gộp AN TOÀN theo id giống hệt mergeOneClassFeed(), sẽ
+     không bao giờ làm mất bài nộp của học sinh nào dù thiết bị nào đồng
+     bộ trước/sau. */
+  const subMap = new Map();
+  (Array.isArray(r.submissions) ? r.submissions : []).forEach(s => { if (s && s.id) subMap.set(s.id, s); });
+  (Array.isArray(l.submissions) ? l.submissions : []).forEach(s => { if (s && s.id) subMap.set(s.id, s); });
+  const submissions = Array.from(subMap.values());
+
+  /* "active" (phiên kiểm tra đang mở) chỉ có 1 bản duy nhất tại 1 thời
+     điểm -> lấy theo bên có updatedAt LỚN HƠN (thao tác Bắt Đầu/Đóng Ngay
+     gần đây nhất thắng). Dữ liệu cũ chưa có updatedAt mặc định = 0. */
+  const lActive = (l.active && typeof l.active === "object") ? l.active : {};
+  const rActive = (r.active && typeof r.active === "object") ? r.active : {};
+  const active = (Number(lActive.updatedAt) || 0) >= (Number(rActive.updatedAt) || 0) ? lActive : rActive;
+
+  return { lists, active, submissions, deletedListIds };
+}
+
+/* Hợp nhất field "classes": GIỮ NGUYÊN cách đồng bộ cũ (ghi đè theo bản
+   remote) cho mọi thứ TRỪ classTest — chỉ classTest được merge theo từng
+   mục như mô tả ở trên. Lớp nào chỉ tồn tại cục bộ (vừa tạo, chưa kịp lên
+   server) vẫn được giữ nguyên, không bị xóa mất khi đồng bộ. */
+function mergeSharedClasses_(localClasses, remoteClasses) {
+  const local = (localClasses && typeof localClasses === "object") ? localClasses : {};
+  const remote = (remoteClasses && typeof remoteClasses === "object") ? remoteClasses : {};
+  const merged = {};
+  Object.keys(remote).forEach(cName => {
+    const rC = remote[cName];
+    if (!rC || typeof rC !== "object") { merged[cName] = rC; return; }
+    const lC = local[cName];
+    const mergedClass = Object.assign({}, rC);
+    if (lC && typeof lC === "object") {
+      mergedClass.classTest = mergeClassTestForClass_(lC.classTest, rC.classTest);
+    }
+    merged[cName] = mergedClass;
+  });
+  Object.keys(local).forEach(cName => {
+    if (!(cName in merged)) merged[cName] = local[cName];
+  });
+  return merged;
+}
+
 function applySharedConfig(c) {
   if (!c) return;
   SHARED_FIELDS.forEach(f => {
@@ -3832,6 +4166,12 @@ function applySharedConfig(c) {
       state.classStealFeeds = mergeClassFeeds(state.classStealFeeds, c.classStealFeeds);
     } else if (f === "classGiftFeeds") {
       state.classGiftFeeds = mergeClassFeeds(state.classGiftFeeds, c.classGiftFeeds);
+    } else if (f === "classes") {
+      /* FIX (từ bị xóa trong List Kiểm Tra "hồi sinh") — xem chú thích
+         chi tiết ở mergeSharedClasses_()/mergeClassTestForClass_() phía
+         trên. Trước đây dòng này là "state.classes = c.classes" (ghi đè
+         nguyên cục). */
+      state.classes = mergeSharedClasses_(state.classes, c.classes);
     } else {
       state[f] = c[f];
     }
@@ -4199,7 +4539,7 @@ async function pollLiveUpdates() {
    nếu đang có thay đổi cục bộ chưa kịp đẩy lên máy chủ (pending debounce),
    để tránh đè dữ liệu mới nhập bằng bản cũ hơn do độ trễ mạng. */
 async function pollOwnProgressFromServer() {
-  if (!state.username || _progressSyncTimer) return;
+  if (!state.username || isSavePending()) return;
   const res = await callServer("get_progress", { username: state.username });
   /* FIX (Trúc "lãi/lỗ hiện thông báo xong vài giây sau tự tụt về số cũ"):
      guard _progressSyncTimer ở dòng trên chỉ được kiểm tra TRƯỚC khi gửi
@@ -4217,7 +4557,7 @@ async function pollOwnProgressFromServer() {
      VĨNH VIỄN chứ không chỉ là nhấp nháy UI. Nên phải kiểm tra lại cờ
      NGAY SAU KHI await xong, ngay trước khi ghi đè: nếu cờ đã bật lên
      trong lúc chờ, coi kết quả poll này là stale và bỏ qua hoàn toàn. */
-  if (_progressSyncTimer) return;
+  if (isSavePending()) return;
   if (res && res.ok && res.found && res.progress) {
     applyProgressToState(res.progress);
     sanitizeState(state);
@@ -5908,7 +6248,42 @@ function renderReincarnationModal() {
   }
 }
 
-function buyReincarnationElixir() {
+/* FIX (ca thực tế: máy A tiêu hết Trúc để Luân Hồi lên LV80, máy B mở
+   lại sau đó vẫn hiển thị số Trúc CŨ do bị lệch đồng bộ — xem giải thích
+   gốc ở isSavePending()/markSavePending() phía trên — khiến học viên
+   tưởng nhầm còn đủ Trúc rồi bấm Luân Hồi/Độ Kiếp thêm 1 lần nữa dựa
+   trên số ảo): Luân Hồi Đan và Độ Kiếp là 2 hành động TỐN TRÚC LỚN,
+   KHÔNG THỂ HOÀN TÁC và học viên hiếm khi bấm (không giống cho ăn/mua đồ
+   nhỏ lẻ diễn ra liên tục) — nên chấp nhận thêm một nhịp xác nhận lại
+   với server ngay trước khi trừ Trúc, để chắc chắn con số dùng để kiểm
+   tra "đủ hay chưa" là con số THẬT mới nhất, không phải bản đã lệch từ
+   trước. Hàm này CHỈ ĐỌC (get_progress), không tự ý ghi gì lên server;
+   nếu mạng lỗi thì âm thầm bỏ qua và dùng tạm số cục bộ như hành vi cũ,
+   để không làm hỏng tính năng khi mất mạng. Không đụng tới bất kỳ hành
+   động tiêu Trúc nào khác (cho ăn, mua đồ, minigame...) nên không ảnh
+   hưởng trải nghiệm bấm liên tục của các tính năng đó. */
+async function refreshBambooBeforeCriticalSpend_() {
+  if (!state.username || isSavePending()) return;
+  try {
+    const res = await callServer("get_progress", { username: state.username });
+    if (res && res.ok && res.found && res.progress) {
+      applyProgressToState(res.progress);
+      sanitizeState(state);
+      state.studentProgress[state.username] = captureCurrentProgress();
+      captureServerBaseline_();
+    }
+  } catch (e) {
+    console.warn("refreshBambooBeforeCriticalSpend_: không xác nhận lại được số Trúc với máy chủ (có thể do mất mạng), tạm dùng số cục bộ.", e);
+  }
+}
+
+async function buyReincarnationElixir() {
+  const buyBtn = document.getElementById("buy-reincarnation-btn");
+  if (buyBtn) buyBtn.disabled = true;
+  await refreshBambooBeforeCriticalSpend_();
+  if (buyBtn) buyBtn.disabled = false;
+  renderReincarnationModal();
+
   const g = state.gamification;
   if (!g) return;
   const totalCharm = getTotalCharm(g);
@@ -6013,7 +6388,16 @@ function renderTribulationModal() {
   }
 }
 
-function buyTribulation() {
+async function buyTribulation() {
+  const buyBtn = document.getElementById("buy-tribulation-btn");
+  if (buyBtn) buyBtn.disabled = true;
+  /* Xem giải thích chi tiết ở refreshBambooBeforeCriticalSpend_() /
+     buyReincarnationElixir() phía trên — Độ Kiếp cũng là hành động tốn
+     Trúc lớn, không thể hoàn tác, nên áp dụng đúng cùng lưới an toàn. */
+  await refreshBambooBeforeCriticalSpend_();
+  if (buyBtn) buyBtn.disabled = false;
+  renderTribulationModal();
+
   const g = state.gamification;
   if (!g) return;
   const totalCharm = getTotalCharm(g);
@@ -6371,7 +6755,7 @@ function castFishingLine() {
      cược (không đợi tới lúc saveState() ở resolve) để khoá poll xuyên
      suốt toàn bộ thời gian chờ animation; cờ sẽ tự được mở lại đúng lúc
      bởi pushProgressToServer() khi saveState() ở resolve chạy xong. */
-  _progressSyncTimer = true;
+  markSavePending();
 
   _fishingCasting = true;
   const castBtn = document.getElementById("cast-fishing-btn");
@@ -6622,7 +7006,7 @@ function releaseLantern() {
   /* FIX (Trúc bị trừ đúng nhưng vài giây sau tự "hồi" lại số cũ) — xem
      giải thích chi tiết ở castFishingLine(): khoá poll ngay khi trừ cược,
      không đợi tới saveState() ở resolveLanternRelease(). */
-  _progressSyncTimer = true;
+  markSavePending();
 
   _lanternReleasing = true;
   const releaseBtn = document.getElementById("release-lantern-btn");
@@ -6855,7 +7239,7 @@ function castKiteLine() {
   /* FIX (Trúc bị trừ đúng nhưng vài giây sau tự "hồi" lại số cũ) — xem
      giải thích chi tiết ở castFishingLine(): khoá poll ngay khi trừ cược,
      không đợi tới saveState() ở resolveKiteLaunch(). */
-  _progressSyncTimer = true;
+  markSavePending();
   updateGamificationUI();
   renderKiteModal();
 
@@ -7136,7 +7520,7 @@ function drawFortuneSlip() {
   /* FIX (Trúc bị trừ đúng nhưng vài giây sau tự "hồi" lại số cũ) — xem
      giải thích chi tiết ở castFishingLine(): khoá poll ngay khi trừ cược,
      không đợi tới saveState() ở resolveFortuneDraw(). */
-  _progressSyncTimer = true;
+  markSavePending();
 
   _fortuneDrawing = true;
   const drawBtn = document.getElementById("draw-fortune-btn");
@@ -7382,7 +7766,7 @@ function smashPot(potBtn) {
   /* FIX (Trúc bị trừ đúng nhưng vài giây sau tự "hồi" lại số cũ) — xem
      giải thích chi tiết ở castFishingLine(): khoá poll ngay khi trừ cược,
      không đợi tới saveState() ở resolvePotSmash(). */
-  _progressSyncTimer = true;
+  markSavePending();
 
   _potSmashing = true;
   document.querySelectorAll(".pot-item").forEach(btn => { btn.disabled = true; });
@@ -7700,7 +8084,7 @@ function spinLuckyWheel() {
      resolveWheelSpin() mới bật) để khoá poll xuyên suốt toàn bộ 4.5 giây
      quay; cờ sẽ được pushProgressToServer() tự mở lại đúng lúc khi
      saveState() ở resolveWheelSpin() chạy xong. */
-  _progressSyncTimer = true;
+  markSavePending();
 
   _wheelSpinning = true;
   const spinBtn = document.getElementById("spin-wheel-btn");
@@ -9659,7 +10043,9 @@ function parseClassTestCsv(text) {
     if (!line) continue;
     const parts = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(p => p.replace(/^"|"$/g, "").trim());
     if (parts.length >= 3 && parts[0]) {
-      words.push({ id: ctGenId("ctw"), hanzi: parts[0], pinyin: parts[1], meaning: parts[2] });
+      /* updatedAt: dùng cho merge dữ liệu classTest giữa nhiều thiết bị —
+         xem mergeClassTestForClass_(). */
+      words.push({ id: ctGenId("ctw"), hanzi: parts[0], pinyin: parts[1], meaning: parts[2], updatedAt: Date.now() });
     }
   }
   return words;
@@ -9754,6 +10140,9 @@ function renderClassTestWordsEditor() {
         return;
       }
       word[field] = val;
+      /* updatedAt: dùng cho merge dữ liệu classTest giữa nhiều thiết bị —
+         xem mergeClassTestForClass_(). */
+      word.updatedAt = Date.now();
       saveState();
       fillClassTestListSelect();
     });
@@ -9766,8 +10155,22 @@ function renderClassTestWordsEditor() {
       if (!list2) return;
       const word = list2.words.find(w2 => w2.id === btn.dataset.word);
       if (!confirm(`Xóa từ "${word ? word.hanzi : ""}" khỏi List "${list2.name}"?`)) return;
+      /* FIX (từ bị xóa "hồi sinh" sau khi đồng bộ): ghi lại tombstone —
+         THỜI ĐIỂM xóa — thay vì chỉ đơn giản xóa khỏi mảng words. Nhờ
+         vậy khi hợp nhất (merge) với dữ liệu từ thiết bị khác (vd học
+         sinh đang làm bài, máy chưa kịp nhận bản xóa này), app biết được
+         lần xóa này diễn ra SAU cùng nên xóa phải thắng, thay vì bị ghi
+         đè hồi sinh trở lại. Xem mergeClassTestForClass_(). */
+      if (!list2.deletedWordIds || typeof list2.deletedWordIds !== "object") list2.deletedWordIds = {};
+      list2.deletedWordIds[btn.dataset.word] = Date.now();
       list2.words = list2.words.filter(w2 => w2.id !== btn.dataset.word);
       saveState();
+      /* Đẩy NGAY lên server (không đợi debounce 1.5s) — cùng lý do đã áp
+         dụng cho "Xóa lớp"/"Xóa hẳn List": thao tác xóa là khó khôi phục
+         nhất nếu bị mất do đóng tab/tải lại quá nhanh. */
+      pushSharedConfigNow().catch(() => {
+        alert("⚠️ Đã xóa cục bộ nhưng chưa đồng bộ được lên server (có thể do mất mạng). Vui lòng kiểm tra kết nối mạng và thử lại nếu từ này \"hiện lại\" sau đó.");
+      });
       fillClassTestListSelect();
       renderClassTestWordsEditor();
     });
@@ -9877,7 +10280,9 @@ function initClassTestTeacherHandlers() {
     const pinyin = pinyinIn.value.trim();
     const meaning = meaningIn.value.trim();
     if (!hanzi) return alert("Vui lòng nhập Hán tự cho từ mới!");
-    list.words.push({ id: ctGenId("ctw"), hanzi, pinyin, meaning });
+    /* updatedAt: dùng cho merge dữ liệu classTest giữa nhiều thiết bị —
+       xem mergeClassTestForClass_(). */
+    list.words.push({ id: ctGenId("ctw"), hanzi, pinyin, meaning, updatedAt: Date.now() });
     saveState();
     hanziIn.value = "";
     pinyinIn.value = "";
@@ -9924,12 +10329,25 @@ function initClassTestTeacherHandlers() {
     const list = cData.classTest.lists.find(l => l.id === sel.value);
     if (!list) return alert("Chưa chọn List nào để xóa!");
     if (!confirm(`Xóa hẳn List "${list.name}"? Thao tác này không thể hoàn tác.`)) return;
+    /* FIX (cùng lớp lỗi "từ hồi sinh" — xem mergeClassTestForClass_()):
+       ghi tombstone THỜI ĐIỂM xóa cho List, để merge biết lần xóa này
+       diễn ra sau cùng, không bị hồi sinh nếu 1 thiết bị khác (còn giữ
+       bản cũ) đồng bộ đè lên ngay sau đó. */
+    if (!cData.classTest.deletedListIds || typeof cData.classTest.deletedListIds !== "object") cData.classTest.deletedListIds = {};
+    cData.classTest.deletedListIds[list.id] = Date.now();
     cData.classTest.lists = cData.classTest.lists.filter(l => l.id !== list.id);
     if (cData.classTest.active.listId === list.id && !cData.classTest.active.closed) {
       cData.classTest.active.visible = false;
       cData.classTest.active.closed = true;
+      cData.classTest.active.updatedAt = Date.now();
     }
     saveState();
+    /* Đẩy NGAY lên server (không đợi debounce), cùng lý do đã áp dụng
+       cho "Xóa lớp"/"Xóa từ trong List" — thao tác xóa hẳn List là khó
+       khôi phục nhất nếu bị mất do đóng tab/tải lại quá nhanh. */
+    pushSharedConfigNow().catch(() => {
+      alert("⚠️ Đã xóa cục bộ nhưng chưa đồng bộ được lên server (có thể do mất mạng). Vui lòng kiểm tra kết nối mạng và thử lại nếu List này \"hiện lại\" sau đó.");
+    });
     fillClassTestListSelect();
     renderClassTestWordsEditor();
     renderClassTestStatus();
@@ -9951,7 +10369,10 @@ function initClassTestTeacherHandlers() {
       hidePinyin,
       durationMinutes,
       startedAt: Date.now(),
-      closed: false
+      closed: false,
+      /* updatedAt: dùng cho merge "active" giữa nhiều thiết bị — xem
+         mergeClassTestForClass_(). */
+      updatedAt: Date.now()
     };
     saveState();
     pushSharedConfigNow().catch(() => {
@@ -9968,6 +10389,9 @@ function initClassTestTeacherHandlers() {
     if (!confirm("Đóng bài kiểm tra NGAY? Toàn bộ học sinh chưa nộp sẽ bị tự động nộp bài dở dang và đưa về Vườn Trúc.")) return;
     cData.classTest.active.closed = true;
     cData.classTest.active.visible = false;
+    /* updatedAt: dùng cho merge "active" giữa nhiều thiết bị — xem
+       mergeClassTestForClass_(). */
+    cData.classTest.active.updatedAt = Date.now();
     saveState();
     pushSharedConfigNow().catch(() => {
       alert("⚠️ Đã đóng cục bộ nhưng chưa đồng bộ được lên server. Vui lòng kiểm tra kết nối mạng và thử lại.");
@@ -10861,13 +11285,13 @@ function renderLeaderboardContent() {
               <span style="font-size:24px;" class="${medalClass}">${animal ? animal.icon : medal}</span>
               <div>
                 <strong style="color:var(--seal-dark); font-size:15px;">#${idx + 1} ${p.name} ${isMe ? ' (Bạn)' : ''}${renderBadgeChipsHtml(p.badges)}${renderLightspeedBadgeHtml(p.badges)}${renderLevelAuraTagHtml(p.level)}${animal ? renderTransformBadgeHtml(p.spiritAnimal) : ''}${renderReincarnationBadgeHtml(p.reincarnationCount)}${renderTribulationBadgeHtml(p.tribulationCount)}</strong>
-                <div style="font-size:12px; color:${isPendingTribulation ? '#FFEE58' : isPendingReincarnation ? '#C62828' : 'var(--ink-soft)'}; font-weight:${(isPendingTribulation || isPendingReincarnation) ? '800' : '400'};">Trạng thái: ${p.outfit} · ${levelStatusHtml}${p.charmLocked ? ` <span style="color:#D81B60; font-weight:800;" title="Đủ XP nhưng thiếu Mị Lực để lên Level tiếp">🔒 cần thêm 💖</span>` : ''}${isLegendaryGateLocked ? ` <span style="color:#FFC107; font-weight:800;" title="Đã Level 65 nhưng chưa hóa hình Linh Thú Truyền Thuyết">✨🔒 cần Thú Truyền Thuyết</span>` : ''}</div>
+                <div class="lb-pending-status-text" style="font-size:12px; color:${isPendingTribulation ? '#FFEE58' : isPendingReincarnation ? '#C62828' : 'var(--ink-soft)'}; font-weight:${(isPendingTribulation || isPendingReincarnation) ? '800' : '400'};">Trạng thái: ${p.outfit} · ${levelStatusHtml}${p.charmLocked ? ` <span style="color:#D81B60; font-weight:800;" title="Đủ XP nhưng thiếu Mị Lực để lên Level tiếp">🔒 cần thêm 💖</span>` : ''}${isLegendaryGateLocked ? ` <span style="color:#FFC107; font-weight:800;" title="Đã Level 65 nhưng chưa hóa hình Linh Thú Truyền Thuyết">✨🔒 cần Thú Truyền Thuyết</span>` : ''}</div>
               </div>
             </div>
             <div style="display:flex; align-items:center; gap:14px;">
               <div style="text-align:right;">
-                <div style="font-weight:800; color:var(--seal-dark); font-size:15px;">${p.totalXp} XP</div>
-                <div style="font-size:12px; color:var(--jade-dark); font-weight:700;">🎋 ${p.bambooPouch} Trúc</div>
+                <div class="lb-pending-xp-text" style="font-weight:800; color:var(--seal-dark); font-size:15px;">${p.totalXp} XP</div>
+                <div class="lb-pending-truc-text" style="font-size:12px; color:var(--jade-dark); font-weight:700;">🎋 ${p.bambooPouch} Trúc</div>
               </div>
               ${!isMe ? `<button class="btn btn-bad lb-steal-btn" data-peer-username="${p.username}" style="font-size:11px; padding:6px 10px; background:#E53935; border-color:#B71C1C;">🐾 Cướp Trúc</button>` : ''}
             </div>
@@ -11332,6 +11756,20 @@ function initTeacherCMSHandlers() {
     state.gamification.announcement = text; // giữ đồng bộ cho code cũ còn tham chiếu
     saveState();
     updateGamificationUI();
+    /* FIX: saveState() ở trên chỉ đẩy thông báo lên server qua
+       pushSharedConfigToServer() — hàm này DEBOUNCE 1.5 giây để gộp nhiều
+       thay đổi liên tiếp (xem comment chi tiết ở định nghĩa
+       pushSharedConfigNow()). Nếu giáo viên bấm "Ghim Thông Báo" xong rồi
+       đóng tab / tải lại trang / bấm Đăng xuất ngay trong 1.5s đó, timer
+       debounce bị hủy theo trang trước khi kịp chạy -> thông báo mới KHÔNG
+       BAO GIỜ được lưu lên server. Lần mở app sau đó (hoặc thiết bị khác),
+       syncSharedConfigFromServer() chạy ngay khi tải trang sẽ kéo về bản CŨ
+       vẫn còn trên server và ghi đè lên state hiện tại, khiến thông báo
+       "tự trở về" nội dung trước khi sửa — đúng lỗi giáo viên gặp phải.
+       Gọi thêm pushSharedConfigNow() ở đây (giống hệt cách đã dùng cho Tạo/
+       Xóa/Đổi tên lớp) để đẩy lên server NGAY LẬP TỨC, không chờ debounce,
+       đảm bảo thông báo được lưu an toàn trước khi giáo viên rời trang. */
+    pushSharedConfigNow().catch(() => {});
     alert("Đã ghim thông báo dặn dò cho CẢ LỚP! Mọi học viên sẽ thấy trong ít giây.");
   });
 
@@ -12942,7 +13380,7 @@ window.addEventListener("DOMContentLoaded", () => {
        Trúc không hề lên server — lần mở app sau, syncProgressFromServer()
        kéo bản CŨ từ server về đè mất phần Trúc vừa kiếm được. Giờ cảnh
        báo đóng trang cho CẢ 2 trường hợp có lưu đang chờ debounce. */
-    if (_sharedConfigPushPending || _progressSyncTimer) {
+    if (_sharedConfigPushPending || isSavePending()) {
       e.preventDefault();
       e.returnValue = "";
     }
@@ -12960,7 +13398,7 @@ window.addEventListener("DOMContentLoaded", () => {
      cách) thay vì lặp lại y hệt logic gọi callServer("save_progress",...)
      ở đây — tránh 2 nơi cùng sửa mà quên đồng bộ nhau. */
   const flushProgressOnHide_ = () => {
-    if (document.hidden && _progressSyncTimer && state.username) {
+    if (document.hidden && isSavePending() && state.username) {
       pushProgressToServerNow();
     }
   };
@@ -12993,7 +13431,7 @@ window.addEventListener("DOMContentLoaded", () => {
      nên thêm 1 lượt flush nữa ở đây làm lưới an toàn thứ 2 — không thay
      thế visibilitychange, chỉ tăng thêm cơ hội gửi kịp save_progress. */
   window.addEventListener("pagehide", () => {
-    if (_progressSyncTimer && state.username) {
+    if (isSavePending() && state.username) {
       pushProgressToServerNow();
     }
     /* FIX (cùng lớp lỗi mất bài nộp Kiểm Tra Trên Lớp — xem chú thích ở
