@@ -813,7 +813,6 @@
     border:2px solid transparent !important; position:relative; overflow:hidden;
     background:linear-gradient(var(--paper), var(--paper)) padding-box, conic-gradient(from 0deg,#FF6D00,#FFC107,#D500F9,#00BFA5,#FF6D00) border-box !important;
     box-shadow:0 0 14px 4px rgba(255,109,0,0.4) !important;
-    animation:reincHaloSpin 5s linear infinite;
   }
   .lb-row-legendary-transformed::after{ content:""; position:absolute; top:0; left:-60%; width:35%; height:100%; background:linear-gradient(120deg, transparent, rgba(255,255,255,0.8), transparent); animation:badgeSparkleSweep 1.8s linear infinite; pointer-events:none; }
 
@@ -2402,8 +2401,8 @@ const APP_BUILD_ID = "20260815a";
    client (mọi quyền thật đã bị khóa ở RLS, chỉ mở qua RPC — xem file
    supabase_schema.sql). ANSWER_SHEET_ENDPOINT ở trên vẫn giữ nguyên,
    CHỈ dùng cho action "student_answer" (sheet Answers không chuyển). */
-const SUPABASE_URL = "https://ttvqxcgrxwgyrhqkpumx.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_vKcUv1jorSR_ImYUmaSM9A_Sb42K0kD";
+const SUPABASE_URL = "https://hwlnrkqcxchxcrcbiykg.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_S28wsImII_rbOWsH6iAoTg_5gFE3Bff";
 /* FIX (lỗi "không kết nối được máy chủ" CHỈ xảy ra trên iPad, không xảy ra
    trên PC/iPhone): thư viện supabase-js, mặc định, sẽ cố ĐỌC/GHI
    localStorage ngay khi khởi tạo (và trước MỌI lệnh gọi .rpc()) để tự động
@@ -4373,12 +4372,53 @@ function syncPeersFromRoster() {
    định kỳ kéo lại cấu hình chung + danh sách học viên + tiến trình
    của chính mình, và chỉ chạy khi tab đang mở (document.hidden =
    false) để đỡ tốn quota Apps Script. ========================= */
-const LIVE_SYNC_INTERVAL_MS = 8000;
+/* FIX (giảm egress Supabase — 12/09): trước đây 8000ms (8 giây), khiến
+   MỌI tab học viên đang mở tự động gọi lại get_shared_config +
+   get_class_members + get_progress liên tục suốt buổi học. Riêng
+   get_shared_config kéo về TOÀN BỘ cấu hình dùng chung (video, ngữ pháp,
+   reward matrix... và đặc biệt là customWords — danh sách từ vựng giáo
+   viên tự thêm, có thể lên tới cả ngàn từ), nên chỉ cần vài chục học
+   viên mở app 1 buổi là egress đã tính bằng GB. Giãn ra 60 giây giảm
+   ngay ~7.5 lần mà KHÔNG ảnh hưởng tới việc LƯU bài của học viên (lưu
+   bài đi qua cơ chế debounce/flush hoàn toàn riêng — xem saveState(),
+   pushProgressToServerNow(), flushProgressOnHide_() — không phụ thuộc
+   vào hằng số này chút nào), chỉ làm chậm lại việc HIỂN THỊ cập nhật từ
+   thiết bị/tài khoản khác (giáo viên cộng Trúc từ máy khác, bảng xếp
+   hạng của bạn học...). */
+const LIVE_SYNC_INTERVAL_MS = 60000;
+
+/* FIX (tách vocab ra khỏi vòng lặp poll nhanh — 12/09): get_shared_config
+   (chứa customWords/videos/grammarSections... nặng nhất trong 3 lời gọi
+   của pollLiveUpdates) giờ chỉ thực sự gọi lên server mỗi
+   SHARED_CONFIG_SLOW_POLL_EVERY_N_TICKS lượt poll (mặc định 5 lượt x 60s
+   = 5 phút/lần) thay vì mọi lượt như get_class_members/get_progress.
+   NGOẠI LỆ: nếu học viên/giáo viên đang thực sự đứng ở 1 màn hình cần dữ
+   liệu vocab/cấu hình MỚI NHẤT ngay lập tức (đang làm bài dùng từ vựng,
+   đang xem/sửa danh sách từ trong CMS...), vẫn gọi mỗi lượt như cũ để
+   KHÔNG ảnh hưởng tới trải nghiệm ở các màn hình đó. Việc chuyển màn
+   hình (visibilitychange, hoặc bấm vào các tab trên) đều có nơi khác
+   trong code chủ động gọi lại pollLiveUpdates()/syncSharedConfigFromServer()
+   ngay lập tức nên không lo bị "kẹt" dữ liệu cũ khi mới vào các màn hình
+   này. */
+const SHARED_CONFIG_SLOW_POLL_EVERY_N_TICKS = 5;
+const SHARED_CONFIG_FAST_VIEW_IDS_ = [
+  "view-manage", "view-teacher-lists", "view-grammar",
+  "view-quiz", "view-pinyintest", "view-timed", "view-wordchallenge",
+  "view-classtest", "view-dictation"
+];
+function sharedConfigNeedsFastPoll_() {
+  const activeView = document.querySelector("section.view.active");
+  const vId = activeView ? activeView.id : "";
+  return SHARED_CONFIG_FAST_VIEW_IDS_.includes(vId);
+}
+
 let _liveSyncTimer = null;
 let _liveSyncVisHandlerAttached = false;
+let _liveSyncTickCount = 0;
 
 function startLiveSync() {
   stopLiveSync();
+  _liveSyncTickCount = 0;
   _liveSyncTimer = setInterval(pollLiveUpdates, LIVE_SYNC_INTERVAL_MS);
   if (!_liveSyncVisHandlerAttached) {
     document.addEventListener("visibilitychange", () => {
@@ -4393,6 +4433,7 @@ function stopLiveSync() {
     clearInterval(_liveSyncTimer);
     _liveSyncTimer = null;
   }
+  _liveSyncTickCount = 0;
 }
 
 /* =========================================================
@@ -4518,11 +4559,21 @@ function startVersionCheckWatcher() {
 
 async function pollLiveUpdates() {
   if (document.hidden || !state.username) return;
-  await Promise.all([
-    syncSharedConfigFromServer(),
-    refreshServerRoster(),
-    pollOwnProgressFromServer()
-  ]);
+
+  /* FIX (giảm egress — 12/09): get_shared_config (nặng nhất vì chứa
+     customWords/videos/grammarSections) chỉ gọi mỗi
+     SHARED_CONFIG_SLOW_POLL_EVERY_N_TICKS lượt, TRỪ KHI đang ở 1 màn
+     hình thực sự cần dữ liệu này mới nhất ngay (xem
+     sharedConfigNeedsFastPoll_()) — khi đó vẫn gọi mỗi lượt như cũ để
+     không ảnh hưởng tính năng. */
+  _liveSyncTickCount++;
+  const shouldSyncSharedConfigNow =
+    sharedConfigNeedsFastPoll_() ||
+    (_liveSyncTickCount % SHARED_CONFIG_SLOW_POLL_EVERY_N_TICKS === 0);
+
+  const tasks = [refreshServerRoster(), pollOwnProgressFromServer()];
+  if (shouldSyncSharedConfigNow) tasks.push(syncSharedConfigFromServer());
+  await Promise.all(tasks);
   syncOwnDisplayNameFromRoster();
 
   const activeView = document.querySelector("section.view.active");
