@@ -908,10 +908,14 @@
      toàn nền chớp sáng trắng-tím-xanh liên tục, hiệu ứng "bắt mắt nhất" bảng */
   .lb-row-tribulation{
     border:3px solid transparent !important; position:relative; overflow:hidden;
-    background:linear-gradient(var(--paper), var(--paper)) padding-box, conic-gradient(from 0deg,#FFEE58,#7C4DFF,#00E5FF,#FFEE58,#7C4DFF,#00E5FF,#FFEE58) border-box !important;
+    background:linear-gradient(var(--paper), var(--paper)) padding-box, conic-gradient(from var(--trib-angle, 0deg),#FFEE58,#7C4DFF,#00E5FF,#FFEE58,#7C4DFF,#00E5FF,#FFEE58) border-box !important;
     box-shadow:0 0 16px 5px rgba(124,77,255,0.55), 0 0 26px 9px rgba(0,229,255,0.3) !important;
-    animation:reincHaloSpin 6s linear infinite;
+    /* FIX: trước đây dùng reincHaloSpin (transform:rotate) lên CẢ DÒNG nên nguyên thẻ
+       (tên, badge, nút) bị quay tròn 360°. Giờ chỉ xoay GÓC của viền conic-gradient. */
+    animation:tribBorderSpin 6s linear infinite;
   }
+  @property --trib-angle{ syntax:'<angle>'; inherits:false; initial-value:0deg; }
+  @keyframes tribBorderSpin{ from{ --trib-angle:0deg; } to{ --trib-angle:360deg; } }
   .lb-row-tribulation::after{
     content:""; position:absolute; inset:0; pointer-events:none;
     background:radial-gradient(circle at 15% 20%, rgba(255,255,255,0.9), transparent 40%);
