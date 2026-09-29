@@ -674,6 +674,16 @@
     100%{ left:120%; }
   }
 
+  /* ===== TẮT vệt sáng trắng quét ngang trên các thẻ Bảng Xếp Hạng (Top 1/2/3, thú hóa hình, chờ Luân Hồi/Độ Kiếp, aura level) =====
+     Chỉ ẩn lớp ::after của các thẻ hàng; không đụng tới badge/chip nhỏ hay hiệu ứng khác. */
+  .lb-rank-1::after, .lb-rank-2::after, .lb-rank-3::after,
+  .lb-row-transformed::after,
+  .lb-row-legendary-transformed::after,
+  .lb-row-pending-reincarnation::after,
+  .lb-row-pending-tribulation::after,
+  .lb-lvl-aura-3::after,
+  .lb-lvl-aura-8::after{ display:none !important; animation:none !important; }
+
   /* ===== Huy Hiệu "Tốc Độ Ánh Sáng" (Thử Thách Thời Gian) ===== */
   .lightspeed-panel{
     background:linear-gradient(135deg, var(--accent-light), var(--paper-dark));
