@@ -1235,6 +1235,183 @@
     .gh-item{ justify-content:center; }
   }
 </style>
+<!-- ==================================================================
+     GIAO DIỆN THEO THIẾT BỊ: ĐIỆN THOẠI / IPAD / MÁY TÍNH
+     Khối này CHỈ ĐƯỢC THÊM VÀO – không sửa bất kỳ dòng CSS/JS gốc nào.
+     Hoạt động thuần bằng CSS media query, nên KHÔNG đụng tới logic,
+     dữ liệu, đăng nhập, bài kiểm tra... Muốn tắt: xoá cả khối này
+     (thẻ <style id="device-layouts"> và <script id="device-layouts-js">).
+
+       Điện thoại        : rộng <768px (hoặc điện thoại xoay ngang)
+                           -> thanh tab nằm DƯỚI đáy màn hình như app
+       iPad dọc / cửa sổ nhỏ : 768px – 1023px
+                           -> thanh tab ngang phía trên, nút to dễ chạm
+       Máy tính / iPad ngang : từ 1024px
+                           -> thanh tab dọc bên TRÁI (sidebar), nội dung rộng hơn
+     ================================================================== -->
+<style id="device-layouts">
+
+/* ---------- Dùng chung cho thiết bị cảm ứng ---------- */
+@media (pointer:coarse){
+  button, .btn, select, input, textarea, .option-btn, nav.tabs button{
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
+  }
+}
+@media (hover:none){
+  /* Trên màn hình cảm ứng, hiệu ứng "hover" hay bị kẹt sau khi chạm -> tắt */
+  .btn:hover, .option-btn:hover:not(:disabled), #theme-toggle-btn:hover{ transform:none; }
+}
+
+/* =====================================================================
+   1) ĐIỆN THOẠI
+   ===================================================================== */
+@media (max-width:767px), (max-height:500px) and (pointer:coarse){
+  html{ scroll-padding-bottom:96px; }
+  body{ padding-bottom:calc(92px + env(safe-area-inset-bottom, 0px)); }
+  iframe, img, video, canvas{ max-width:100%; }
+
+  /* Nút giao diện sáng/tối: gọn thành hình tròn, cuộn theo trang (không đè nội dung) */
+  #theme-toggle-btn{
+    position:absolute; top:10px; right:10px;
+    width:40px; height:40px; padding:0; justify-content:center; border-radius:50%; font-size:18px;
+  }
+  #theme-toggle-label{ display:none; }
+  .corner-note{ display:none; }
+  header{ padding:52px 14px 12px; }
+
+  main{ margin:14px auto; padding:0 12px; }
+  .btn{ min-height:44px; }
+  .filters select, .filters input[type=text]{ flex:1 1 140px; min-width:0; }
+  .quiz-box{ padding:22px 16px; }
+  .quiz-prompt .hanzi{ font-size:52px; }
+
+  /* ----- Thanh tab dưới đáy (kiểu ứng dụng điện thoại) ----- */
+  body nav.tabs{
+    position:fixed; top:auto; bottom:0; left:0; right:0; z-index:40;
+    max-width:none; margin:0; gap:2px;
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+    flex-wrap:nowrap; justify-content:flex-start;
+    overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity;
+    border-bottom:none; border-top:1px solid var(--paper-darker);
+    border-radius:18px 18px 0 0;
+    background:color-mix(in srgb, var(--card-bg) 96%, transparent);
+    box-shadow:0 -6px 22px var(--shadow-soft);
+  }
+  body nav.tabs button{
+    flex:0 0 auto; min-width:64px; min-height:54px; padding:6px 6px 5px; gap:2px;
+    border:2px solid transparent; border-radius:14px; background:transparent; box-shadow:none;
+    color:var(--ink-soft); scroll-snap-align:center; transform:none;
+  }
+  body nav.tabs button .tab-icon{ font-size:22px; }
+  body nav.tabs button .tab-label{ font-size:10px; max-width:72px; }
+  body nav.tabs button:hover,
+  body nav.tabs button:active{ transform:none; box-shadow:none; border-color:transparent; color:var(--ink-soft); }
+  body nav.tabs button:hover .tab-icon{ transform:none; }
+  body nav.tabs button.active,
+  body nav.tabs button.active:hover{
+    transform:none; background:var(--accent-light); color:var(--seal-dark);
+    border-color:var(--jade); box-shadow:none;
+  }
+  body nav.tabs button.active .tab-icon{ transform:scale(1.12); filter:none; }
+  body nav.tabs button.active::after{ display:none; }
+  body nav.tabs button.tab-teacher,
+  body nav.tabs button.tab-teacher:hover{ background:transparent; border-color:transparent; color:var(--seal-dark); }
+  body nav.tabs button.tab-teacher.active,
+  body nav.tabs button.tab-teacher.active:hover{ background:var(--accent-light); border-color:var(--jade); color:var(--seal-dark); }
+
+  /* Khi đang gõ vào ô nhập, ẩn thanh tab để bàn phím không bị chật */
+  body:has(input:focus, textarea:focus) nav.tabs{ display:none; }
+}
+
+/* Điện thoại xoay ngang: thanh tab thấp hơn để dành chỗ cho nội dung */
+@media (max-height:500px) and (pointer:coarse){
+  body{ padding-bottom:calc(66px + env(safe-area-inset-bottom, 0px)); }
+  body nav.tabs button{ min-height:46px; }
+  body nav.tabs button .tab-icon{ font-size:19px; }
+  header{ padding-top:16px; }
+}
+
+/* =====================================================================
+   2) iPAD DỌC / CỬA SỔ TRUNG BÌNH  (768px – 1023px)
+   ===================================================================== */
+@media (min-width:768px) and (min-height:501px){
+  :root{ --content-w:1000px; }
+  main{ max-width:var(--content-w); padding:0 24px; }
+  .gamification-header-bar, .teacher-announcement-banner{ max-width:var(--content-w); }
+  .btn{ min-height:46px; }
+}
+@media (min-width:768px) and (max-width:1023px) and (min-height:501px){
+  /* Một hàng tab cuộn ngang, nút to dễ chạm bằng ngón tay */
+  body nav.tabs{
+    max-width:var(--content-w);
+    flex-wrap:nowrap; justify-content:flex-start; overflow-x:auto; overflow-y:hidden;
+    gap:12px; padding:12px 20px 18px;
+  }
+  body nav.tabs button{ min-width:94px; padding:12px 12px 10px; }
+  body nav.tabs button .tab-label{ font-size:12px; max-width:106px; }
+  /* Chừa chỗ cho 2 nhãn cố định ở góc để không đè lên tiêu đề */
+  header{ padding-top:60px; }
+}
+
+/* =====================================================================
+   3) MÁY TÍNH / iPAD NGANG  (từ 1024px): sidebar bên trái
+   ===================================================================== */
+@media (min-width:1024px) and (min-height:501px){
+  :root{ --sidebar-w:232px; }
+  body{ padding-left:var(--sidebar-w); }
+
+  body nav.tabs{
+    position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w); max-width:none; margin:0;
+    flex-direction:column; flex-wrap:nowrap; justify-content:flex-start; align-items:stretch;
+    gap:6px; padding:64px 12px 20px;
+    overflow-x:hidden; overflow-y:auto; scroll-snap-type:none;
+    background:var(--card-bg); -webkit-backdrop-filter:none; backdrop-filter:none;
+    border-bottom:none; border-right:1px solid var(--paper-darker); border-radius:0;
+    box-shadow:4px 0 24px var(--shadow-soft);
+  }
+  body nav.tabs button{
+    flex:0 0 auto; flex-direction:row; justify-content:flex-start; align-items:center;
+    width:100%; min-width:0; gap:12px; padding:10px 14px;
+    border-color:transparent; background:transparent; box-shadow:none; border-radius:14px;
+    transform:none;
+  }
+  body nav.tabs button .tab-icon{ font-size:22px; width:28px; text-align:center; flex:0 0 auto; }
+  body nav.tabs button .tab-label{ font-size:14px; max-width:none; text-align:left; white-space:normal; }
+  body nav.tabs button:hover{ transform:translateX(3px); background:var(--accent-light); border-color:transparent; box-shadow:none; }
+  body nav.tabs button:hover .tab-icon{ transform:none; }
+  body nav.tabs button.active,
+  body nav.tabs button.active:hover{
+    transform:none;
+    background:linear-gradient(135deg, var(--jade), var(--jade-dark)); border-color:var(--jade-dark); color:#fff;
+    box-shadow:var(--shadow-md);
+  }
+  body nav.tabs button.active .tab-icon{ transform:none; }
+  body nav.tabs button.active::after{ display:none; }
+  body nav.tabs button.tab-teacher{ margin-top:8px; border-color:var(--seal-dark); background:var(--accent-light); }
+  body nav.tabs button.tab-teacher:hover{ border-color:var(--seal-dark); transform:translateX(3px); }
+  body nav.tabs button.tab-teacher.active{ background:linear-gradient(135deg, var(--seal-dark), #123D18); }
+
+  /* Tên lớp nhỏ nằm ở đầu sidebar */
+  .corner-note{ max-width:calc(var(--sidebar-w) - 28px); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* Nội dung tận dụng màn hình rộng */
+  .flashcard{ max-width:460px; height:320px; }
+  .face .hanzi, .quiz-prompt .hanzi{ font-size:72px; }
+  .quiz-box{ padding:38px 34px; }
+}
+/* Màn hình thấp (iPad ngang, laptop nhỏ): thu gọn sidebar cho vừa 15 nút */
+@media (min-width:1024px) and (min-height:501px) and (max-height:800px){
+  body nav.tabs{ gap:3px; padding-top:56px; }
+  body nav.tabs button{ padding:7px 14px; }
+}
+/* Màn hình rất rộng */
+@media (min-width:1440px){
+  :root{ --content-w:1120px; }
+}
+</style>
+
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
@@ -2296,6 +2473,18 @@
         </div>
         <input type="text" id="cms-grant-reason" placeholder="Lý do bắt buộc (vd: Thưởng hăng hái phát biểu)..." style="width:100%; margin-bottom:12px;">
         <button class="btn btn-ok" id="cms-execute-grant-btn">Thực Hiện Ghi Nhận 🚀</button>
+      </div>
+
+      <!-- NỢ TRÚC CMS -->
+      <div style="background:var(--card-bg); border:3px solid var(--paper-darker); border-radius:22px; padding:20px; margin-bottom:20px;">
+        <h4 style="margin:0 0 6px; color:var(--seal-dark); font-family:var(--serif);">💸 Quản Lý Nợ Trúc</h4>
+        <p style="font-size:12px; color:var(--ink-soft); margin:0 0 12px;">Đặt số trúc học viên đang nợ (ghi đè số cũ). Còn nợ thì BXH hiện "Nợ xxx trúc" và học viên không cho Gấu ăn được; trả đủ sẽ tự mở khoá.</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+          <div><label style="font-size:12px; font-weight:700;">Chọn học viên:</label><select id="cms-debt-student" style="width:100%;"></select></div>
+          <div><label style="font-size:12px; font-weight:700;">Số trúc nợ:</label><input type="number" id="cms-debt-amount" min="1" value="10"></div>
+        </div>
+        <button class="btn btn-bad" id="cms-debt-set-btn">Đặt Nợ 💸</button>
+        <div id="cms-debt-list" style="display:flex; flex-direction:column; gap:8px; margin-top:14px;"></div>
       </div>
 
       <!-- BADGES CMS -->
@@ -3954,7 +4143,7 @@ async function syncProgressFromServer() {
    viên nào, mà phải giống nhau trên MỌI thiết bị. Trước đây
    phần này chỉ nằm trong localStorage của từng máy nên mỗi
    thiết bị thấy một giao diện/lớp học khác nhau. */
-const SHARED_FIELDS = ["classes", "customTitle", "colorPaper", "colorInk", "colorJade", "bgImage", "announcement", "classFeeds", "classStealFeeds", "classGiftFeeds"];
+const SHARED_FIELDS = ["classes", "customTitle", "colorPaper", "colorInk", "colorJade", "bgImage", "announcement", "classFeeds", "classStealFeeds", "classGiftFeeds", "bambooDebts"];
 
 function captureSharedConfig() {
   const c = {};
@@ -4163,7 +4352,9 @@ function applySharedConfig(c) {
   if (!c) return;
   SHARED_FIELDS.forEach(f => {
     if (c[f] === undefined) return;
-    if (f === "classFeeds") {
+    if (f === "bambooDebts") {
+      state.bambooDebts = (typeof mergeBambooDebts_ === "function") ? mergeBambooDebts_(state.bambooDebts, c.bambooDebts) : c.bambooDebts;
+    } else if (f === "classFeeds") {
       state.classFeeds = mergeClassFeeds(state.classFeeds, c.classFeeds);
     } else if (f === "classStealFeeds") {
       state.classStealFeeds = mergeClassFeeds(state.classStealFeeds, c.classStealFeeds);
@@ -10853,7 +11044,10 @@ function toggleDictationVocabPanel() {
     panel.style.display = "block";
     if (btn) btn.textContent = "🙈 Ẩn list từ vựng";
     panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    document.getElementById("dictation-vocab-search")?.focus();
+    /* Trên điện thoại/iPad (màn hình cảm ứng) không tự focus để bàn phím không bật lên che danh sách. */
+    let _isTouchPrimary = false;
+    try { _isTouchPrimary = !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches); } catch (e) {}
+    if (!_isTouchPrimary) document.getElementById("dictation-vocab-search")?.focus();
   }
 }
 
@@ -11339,7 +11533,7 @@ function renderLeaderboardContent() {
             <div style="display:flex; align-items:center; gap:12px;">
               <span style="font-size:24px;" class="${medalClass}">${animal ? animal.icon : medal}</span>
               <div>
-                <strong style="color:var(--seal-dark); font-size:15px;">#${idx + 1} ${p.name} ${isMe ? ' (Bạn)' : ''}${renderBadgeChipsHtml(p.badges)}${renderLightspeedBadgeHtml(p.badges)}${renderLevelAuraTagHtml(p.level)}${animal ? renderTransformBadgeHtml(p.spiritAnimal) : ''}${renderReincarnationBadgeHtml(p.reincarnationCount)}${renderTribulationBadgeHtml(p.tribulationCount)}</strong>
+                <strong style="color:var(--seal-dark); font-size:15px;">#${idx + 1} ${p.name}${typeof renderDebtTagHtml_ === "function" ? renderDebtTagHtml_(p) : ""} ${isMe ? ' (Bạn)' : ''}${renderBadgeChipsHtml(p.badges)}${renderLightspeedBadgeHtml(p.badges)}${renderLevelAuraTagHtml(p.level)}${animal ? renderTransformBadgeHtml(p.spiritAnimal) : ''}${renderReincarnationBadgeHtml(p.reincarnationCount)}${renderTribulationBadgeHtml(p.tribulationCount)}</strong>
                 <div class="lb-pending-status-text" style="font-size:12px; color:${isPendingTribulation ? '#FFEE58' : isPendingReincarnation ? '#C62828' : 'var(--ink-soft)'}; font-weight:${(isPendingTribulation || isPendingReincarnation) ? '800' : '400'};">Trạng thái: ${p.outfit} · ${levelStatusHtml}${p.charmLocked ? ` <span style="color:#D81B60; font-weight:800;" title="Đủ XP nhưng thiếu Mị Lực để lên Level tiếp">🔒 cần thêm 💖</span>` : ''}${isLegendaryGateLocked ? ` <span style="color:#FFC107; font-weight:800;" title="Đã Level 65 nhưng chưa hóa hình Linh Thú Truyền Thuyết">✨🔒 cần Thú Truyền Thuyết</span>` : ''}</div>
               </div>
             </div>
@@ -11435,7 +11629,7 @@ function renderLeaderboardContent() {
             <div style="display:flex; align-items:center; gap:12px;">
               <span style="font-size:24px;" class="${medalClass}">${animal ? animal.icon : medal}</span>
               <div>
-                <strong style="color:var(--seal-dark); font-size:15px;">#${idx + 1} ${p.name} ${isMe ? ' (Bạn)' : ''}${renderBadgeChipsHtml(p.badges)}${renderLightspeedBadgeHtml(p.badges)}${renderLevelAuraTagHtml(p.level)}${animal ? renderTransformBadgeHtml(p.spiritAnimal) : ''}${renderReincarnationBadgeHtml(p.reincarnationCount)}${renderTribulationBadgeHtml(p.tribulationCount)}</strong>
+                <strong style="color:var(--seal-dark); font-size:15px;">#${idx + 1} ${p.name}${typeof renderDebtTagHtml_ === "function" ? renderDebtTagHtml_(p) : ""} ${isMe ? ' (Bạn)' : ''}${renderBadgeChipsHtml(p.badges)}${renderLightspeedBadgeHtml(p.badges)}${renderLevelAuraTagHtml(p.level)}${animal ? renderTransformBadgeHtml(p.spiritAnimal) : ''}${renderReincarnationBadgeHtml(p.reincarnationCount)}${renderTribulationBadgeHtml(p.tribulationCount)}</strong>
                 <div style="font-size:12px; color:var(--ink-soft); margin-top:2px;">Đạo cụ: ${decoIcons}${isLegendaryGateLocked ? ` <span style="color:#FFC107; font-weight:800;" title="Đã Level 65 nhưng chưa hóa hình Linh Thú Truyền Thuyết">✨🔒 cần Thú Truyền Thuyết</span>` : ''}</div>
               </div>
             </div>
@@ -11699,6 +11893,8 @@ function initTeacherCMSHandlers() {
     if (cData.pyMinCounts) delete cData.pyMinCounts[topic];
     if (cData.pyThresholds) delete cData.pyThresholds[topic];
     if (cData.pyRestartThresholds) delete cData.pyRestartThresholds[topic];
+    /* Video nào đang dùng list này làm "list từ vựng hỗ trợ" thì gỡ liên kết để không bị treo. */
+    (cData.videos || []).forEach(v => { if (v && v.supportTopic === topic) v.supportTopic = ""; });
     const timedBestKey = `${state.currentClassName}_${topic}`;
     if (state.timedBest) delete state.timedBest[timedBestKey];
     if (state.timedSubmissions && state.timedSubmissions[state.currentClassName]) {
@@ -13265,7 +13461,7 @@ function renderTeacherVideoManagerList() {
 
     const wCount = countWordsInTopic(v.supportTopic);
     const badgeHtml = v.supportTopic
-      ? `<span style="display:inline-flex; align-items:center; gap:3px; background:var(--accent-light); color:var(--seal-dark); border:1px solid var(--jade); border-radius:999px; padding:2px 9px; font-size:11px; font-weight:800; margin-left:8px;">🎒 ${wCount} từ · ${v.supportTopic}</span>`
+      ? `<span style="display:inline-flex; align-items:center; gap:3px; background:var(--accent-light); color:var(--seal-dark); border:1px solid var(--jade); border-radius:999px; padding:2px 9px; font-size:11px; font-weight:800; margin-left:8px;">${wCount > 0 ? "🎒 " + wCount + " từ" : "⚠️ list không còn"} · ${v.supportTopic}</span>`
       : "";
 
     row.innerHTML = `
@@ -13282,6 +13478,11 @@ function renderTeacherVideoManagerList() {
     const rowNoneOpt = document.createElement("option");
     rowNoneOpt.value = ""; rowNoneOpt.textContent = "— Không có list hỗ trợ —";
     rowSel.insertBefore(rowNoneOpt, rowSel.firstChild);
+    if (v.supportTopic && wCount === 0) {
+      const staleOpt = document.createElement("option");
+      staleOpt.value = v.supportTopic; staleOpt.textContent = "⚠️ " + v.supportTopic + " (không còn từ)";
+      rowSel.appendChild(staleOpt);
+    }
     rowSel.value = v.supportTopic || "";
     rowSel.onchange = () => {
       const cData2 = getCurrentClassData();
@@ -13700,5 +13901,235 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 </script>
+<!-- Thêm mới: giữ tab đang chọn luôn hiện trong thanh tab cuộn (điện thoại / iPad).
+     Chỉ đọc trạng thái class, không thay đổi dữ liệu hay logic gốc. Có try/catch nên nếu lỗi cũng không ảnh hưởng gì. -->
+<script id="device-layouts-js">
+(function () {
+  try {
+    var nav = document.querySelector("nav.tabs");
+    if (!nav) return;
+    function revealActiveTab() {
+      try {
+        var a = nav.querySelector("button.active");
+        if (!a) return;
+        if (nav.scrollWidth > nav.clientWidth + 2) {
+          nav.scrollTo({ left: a.offsetLeft - (nav.clientWidth - a.offsetWidth) / 2, behavior: "smooth" });
+        } else if (nav.scrollHeight > nav.clientHeight + 2) {
+          nav.scrollTo({ top: a.offsetTop - (nav.clientHeight - a.offsetHeight) / 2, behavior: "smooth" });
+        }
+      } catch (e) {}
+    }
+    new MutationObserver(revealActiveTab).observe(nav, { subtree: true, attributes: true, attributeFilter: ["class"] });
+    window.addEventListener("load", revealActiveTab);
+    window.addEventListener("resize", revealActiveTab);
+  } catch (e) {}
+})();
+</script>
+
+<!-- ==== TÍNH NĂNG NỢ TRÚC (thêm mới) ====
+     Dữ liệu: state.bambooDebts = { username: { amt: số trúc còn nợ, t: thời điểm cập nhật } }
+     Lưu trong cấu hình dùng chung (SHARED_FIELDS) nên mọi thiết bị đều thấy. Merge theo "t" mới nhất.
+     Bản vá: (1) kéo số nợ mới nhất từ server trước khi ghi (tối đa 4s); (2) chống bấm "Trả nợ" 2 lần + không trừ trúc nếu GV vừa xoá nợ.
+     Muốn gỡ tính năng: xoá <style id="debt-css">, <script id="debt-js"> và khối "NỢ TRÚC CMS". -->
+<style id="debt-css">
+  .debt-tag{ display:inline-block; margin-left:6px; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:800; color:#fff; background:linear-gradient(135deg,#E53935,#B71C1C); vertical-align:middle; white-space:nowrap; }
+  #debt-panel{ display:none; background:#FFF3F0; border:3px solid #E53935; border-radius:20px; padding:16px 18px; margin-bottom:16px; text-align:center; }
+  body.theme-dark #debt-panel{ background:#3A1A18; }
+  #debt-panel .debt-row{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+  #debt-panel input{ width:150px; }
+</style>
+<script id="debt-js">
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  function debts(){ if(!state.bambooDebts || typeof state.bambooDebts!=="object") state.bambooDebts={}; return state.bambooDebts; }
+  function getDebt(u){ if(!u) return 0; var d=debts()[u]; return d && d.amt>0 ? Math.floor(d.amt) : 0; }
+  function myDebt(){ return state.role==="teacher" ? 0 : getDebt(state.username); }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+  /* Merge theo từng học viên: bản ghi có t mới hơn thắng (tránh GV và HS ghi đè lẫn nhau) */
+  window.mergeBambooDebts_ = function(local, remote){
+    var out = {}; local = local||{}; remote = remote||{};
+    Object.keys(local).concat(Object.keys(remote)).forEach(function(u){
+      var a=local[u], b=remote[u];
+      out[u] = !a ? b : !b ? a : ((b.t||0) > (a.t||0) ? b : a);
+    });
+    return out;
+  };
+  /* Nhãn "Nợ xxx trúc" trên bảng xếp hạng */
+  window.renderDebtTagHtml_ = function(p){
+    try{
+      var u = p && (p.username || (p.name===state.studentName ? state.username : null));
+      var n = getDebt(u);
+      return n>0 ? '<span class="debt-tag">💸 Nợ '+n+' trúc</span>' : "";
+    }catch(e){ return ""; }
+  };
+
+  /* Khoá cho ăn khi còn nợ */
+  var origFeed = window.feedPanda;
+  if(typeof origFeed==="function"){
+    window.feedPanda = function(amount){
+      var n = myDebt();
+      if(n>0){ alert("💸 Bạn đang nợ "+n+" trúc! Hãy trả hết nợ trước khi cho Gấu Trúc ăn để lên XP nhé 🎋"); return; }
+      return origFeed.apply(this, arguments);
+    };
+  }
+  var FEED_IDS = ["ph-feed-one-btn","ph-feed-all-btn","ph-feed-custom-btn","ph-feed-custom-input","gh-feed-nav-btn"];
+  var lastSig = "";
+  function applyLock(){
+    var n = myDebt();
+    if(n>0) FEED_IDS.forEach(function(id){ var el=$(id); if(el){ el.disabled=true; el.style.opacity="0.5"; el.style.cursor="not-allowed"; el.dataset.debtLock="1"; } });
+    else FEED_IDS.forEach(function(id){ var el=$(id); if(el && el.dataset.debtLock){ delete el.dataset.debtLock; el.style.opacity=""; el.style.cursor=""; if(typeof updateGamificationUI==="function") try{updateGamificationUI();}catch(e){} else el.disabled=false; } });
+  }
+
+  /* Khung "Trả nợ" cho học viên (chèn đầu tab Vườn Trúc) */
+  function ensurePanel(){
+    if($("debt-panel")) return;
+    var host = $("view-pandahome"); if(!host) return;
+    var d = document.createElement("div"); d.id="debt-panel";
+    d.innerHTML = '<div style="font-family:var(--serif); font-size:18px; font-weight:900; color:#B71C1C;">💸 Bạn đang nợ <span id="debt-panel-amt">0</span> trúc</div>'
+      + '<div style="font-size:13px; margin-top:4px;">Trả hết nợ mới được cho Gấu ăn để lên XP. Túi Trúc hiện có: <b id="debt-panel-pouch">0</b> 🎋</div>'
+      + '<div class="debt-row"><input type="number" id="debt-pay-input" min="1" step="1" placeholder="Số trúc trả...">'
+      + '<button class="btn btn-ok" id="debt-pay-btn">💸 Trả nợ</button><button class="btn btn-primary" id="debt-pay-all-btn">Trả tối đa</button></div>';
+    host.insertBefore(d, host.firstChild);
+    $("debt-pay-btn").addEventListener("click", function(){ pay(parseInt($("debt-pay-input").value,10)); });
+    $("debt-pay-all-btn").addEventListener("click", function(){ pay(Infinity); });
+  }
+  function renderPanel(){
+    ensurePanel(); var p=$("debt-panel"); if(!p) return;
+    var n = myDebt();
+    p.style.display = n>0 ? "block" : "none";
+    if(n>0){ $("debt-panel-amt").textContent=n; $("debt-panel-pouch").textContent=(state.gamification&&state.gamification.bambooPouch)||0; }
+  }
+  /* ===== BẢN VÁ 1: kéo số nợ MỚI NHẤT từ server về trước khi ghi =====
+     Vì server lưu cả cấu hình như 1 khối (ai lưu sau thì thắng), nếu máy này còn giữ số nợ cũ
+     rồi đẩy lên thì có thể đè mất khoản nợ giáo viên vừa đặt/xoá. Trước khi ghi, ta hỏi server
+     bản nợ mới nhất (chờ tối đa 4 giây) rồi gộp theo "t" mới nhất bằng mergeBambooDebts_.
+     CHỈ đụng tới state.bambooDebts — không ghi đè bất kỳ trường cấu hình nào khác.
+     Nếu server chậm / lỗi / hết 4 giây thì bỏ qua và làm tiếp như cũ (không chặn thao tác). */
+  var PULL_TIMEOUT_MS = 4000;
+  function pullLatestDebts(){
+    return new Promise(function(resolve){
+      var done = false;
+      var timer = setTimeout(function(){ if(!done){ done = true; resolve(false); } }, PULL_TIMEOUT_MS);
+      function finish(ok){ if(done) return; done = true; clearTimeout(timer); resolve(ok); }
+      var req;
+      try{ req = callServer("get_shared_config", {}); }catch(e){ return finish(false); }
+      Promise.resolve(req).then(function(res){
+        try{
+          if(res && res.ok && res.found && res.config && res.config.bambooDebts && typeof res.config.bambooDebts==="object"){
+            if(done) return;
+            state.bambooDebts = window.mergeBambooDebts_(debts(), res.config.bambooDebts);
+            return finish(true);
+          }
+        }catch(e){}
+        finish(false);
+      }, function(){ finish(false); });
+    });
+  }
+
+  /* ===== BẢN VÁ 2: chống bấm "Trả nợ" nhiều lần liền =====
+     - Cờ paying: đang xử lý 1 lượt trả thì mọi lần bấm thêm bị bỏ qua, 2 nút được khoá tạm.
+     - Sau khi kéo dữ liệu từ server, tính lại số nợ: nếu giáo viên vừa xoá nợ (hoặc đã hết nợ)
+       thì KHÔNG trừ trúc trong túi, chỉ báo cho học viên biết. */
+  var paying = false;
+  function setPayBusy(b){
+    ["debt-pay-btn","debt-pay-all-btn"].forEach(function(id){
+      var el = $(id); if(el){ el.disabled = b; el.style.opacity = b ? "0.6" : ""; }
+    });
+  }
+  async function pay(amount){
+    if(paying) return;
+    var g = state.gamification, u = state.username, n = myDebt();
+    if(!g || !u || n<=0) return;
+    if(!(amount>0)) return alert("Vui lòng nhập số trúc hợp lệ (lớn hơn 0) nhé 🎋");
+    if((g.bambooPouch||0)<=0) return alert("Túi Trúc của bạn đang trống! Hãy làm bài tập để tích trúc rồi trả nợ nhé 🎋");
+    paying = true; setPayBusy(true);
+    try{
+      await pullLatestDebts();
+      /* Trong lúc chờ server, dữ liệu có thể đã đổi -> đọc lại từ đầu */
+      g = state.gamification; n = myDebt();
+      if(!g || state.username!==u) return;
+      if(n<=0){
+        if(typeof showToast==="function") showToast("Khoản nợ của bạn đã được xoá hoặc đã trả hết. Không trừ trúc nào cả 🎋", "success");
+        $("debt-pay-input").value = "";
+        refreshAll();
+        return;
+      }
+      var pouch = g.bambooPouch||0;
+      if(pouch<=0) return alert("Túi Trúc của bạn đang trống! Hãy làm bài tập để tích trúc rồi trả nợ nhé 🎋");
+      var amt = Math.min(amount, n, pouch);
+      g.bambooPouch = pouch - amt;
+      debts()[u] = { amt: n-amt, t: Date.now() };
+      try{ if(typeof addActivityLog==="function") addActivityLog("💸 "+(state.studentName||u)+" đã trả "+amt+" trúc nợ"+(n-amt>0?" (còn nợ "+(n-amt)+")":" — đã hết nợ! 🎉")); }catch(e){}
+      try{ saveState(); updateGamificationUI(); }catch(e){}
+      $("debt-pay-input").value="";
+      if(typeof showToast==="function") showToast(n-amt>0 ? "Đã trả "+amt+" trúc. Còn nợ "+(n-amt)+" trúc." : "🎉 Bạn đã trả hết nợ! Có thể cho Gấu ăn lại rồi.", "success");
+      refreshAll();
+      /* Giữ khoá cho tới khi đẩy xong lên server, nhưng tối đa 15 giây để nút không bị kẹt */
+      try{
+        await Promise.race([ pushSharedConfigNow(), new Promise(function(r){ setTimeout(r, 15000); }) ]);
+      }catch(e){ console.warn("Không đẩy được số nợ lên server", e); }
+    } finally {
+      paying = false; setPayBusy(false);
+    }
+  }
+  function refreshAll(){
+    lastSig=""; renderPanel(); applyLock(); renderTeacherList();
+    try{ if(typeof renderLeaderboardContent==="function") renderLeaderboardContent(); }catch(e){}
+  }
+
+  /* CMS giáo viên */
+  function fillSel(){
+    var sel=$("cms-debt-student"); if(!sel || typeof serverRoster==="undefined") return;
+    var roster=serverRoster.filter(function(s){return s.role!=="teacher";});
+    var sig=roster.map(function(s){return s.username;}).join("|");
+    if(sel.dataset.sig===sig) return; sel.dataset.sig=sig;
+    var prev=sel.value; sel.innerHTML="";
+    roster.forEach(function(s){ var o=document.createElement("option"); o.value=s.username; o.textContent=s.displayName; sel.appendChild(o); });
+    if(roster.some(function(s){return s.username===prev;})) sel.value=prev;
+  }
+  function nameOf(u){ try{ var s=serverRoster.find(function(x){return x.username===u;}); return s? s.displayName : u; }catch(e){ return u; } }
+  function renderTeacherList(){
+    var box=$("cms-debt-list"); if(!box) return; fillSel();
+    var keys=Object.keys(debts()).filter(function(u){return getDebt(u)>0;});
+    box.innerHTML = keys.length ? keys.map(function(u){
+      return '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px 12px; border:2px solid var(--paper-darker); border-radius:12px;">'
+        +'<span><b>'+esc(nameOf(u))+'</b> — nợ <b style="color:#B71C1C;">'+getDebt(u)+'</b> trúc</span>'
+        +'<button class="btn btn-outline" data-clear-debt="'+esc(u)+'" style="padding:6px 12px; font-size:12px;">Xoá nợ</button></div>';
+    }).join("") : '<div class="empty-note" style="padding:12px;">Hiện không có học viên nào nợ trúc 🎉</div>';
+  }
+  async function teacherSet(u, n){
+    if(!u) return alert("Chưa chọn học viên!");
+    await pullLatestDebts(); /* BẢN VÁ 1: gộp số nợ mới nhất của các học viên khác trước khi ghi */
+    debts()[u] = { amt: Math.max(0, Math.floor(n)), t: Date.now() };
+    try{ saveState(); }catch(e){}
+    refreshAll();
+    try{ await pushSharedConfigNow(); }catch(e){ alert("Không lưu được lên máy chủ, hãy thử lại!"); }
+  }
+  document.addEventListener("click", function(e){
+    var t=e.target; if(!t || !t.closest) return;
+    var c=t.closest("[data-clear-debt]");
+    if(c){ teacherSet(c.getAttribute("data-clear-debt"), 0); return; }
+    if(t.closest("#cms-debt-set-btn")){
+      var n=parseInt($("cms-debt-amount").value,10);
+      if(!(n>0)) return alert("Vui lòng nhập số trúc nợ lớn hơn 0 (muốn xoá nợ hãy bấm nút Xoá nợ).");
+      teacherSet($("cms-debt-student").value, n);
+    }
+  });
+
+  var _rt = window.refreshTeacherRosterUI;
+  if(typeof _rt==="function") window.refreshTeacherRosterUI = function(){ var r=_rt.apply(this,arguments); try{ renderTeacherList(); }catch(e){} return r; };
+
+  setInterval(function(){
+    try{
+      var sig = myDebt()+"|"+((state.gamification&&state.gamification.bambooPouch)||0)+"|"+JSON.stringify(debts());
+      if(sig!==lastSig){ lastSig=sig; renderPanel(); renderTeacherList(); try{ if($("view-leaderboard")&&$("view-leaderboard").classList.contains("active")&&typeof renderLeaderboardContent==="function") renderLeaderboardContent(); }catch(e){} }
+      applyLock();
+    }catch(e){}
+  }, 800);
+})();
+</script>
+
 </body>
 </html>
