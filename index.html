@@ -674,16 +674,6 @@
     100%{ left:120%; }
   }
 
-  /* ===== TẮT vệt sáng trắng quét ngang trên các thẻ Bảng Xếp Hạng (Top 1/2/3, thú hóa hình, chờ Luân Hồi/Độ Kiếp, aura level) =====
-     Chỉ ẩn lớp ::after của các thẻ hàng; không đụng tới badge/chip nhỏ hay hiệu ứng khác. */
-  .lb-rank-1::after, .lb-rank-2::after, .lb-rank-3::after,
-  .lb-row-transformed::after,
-  .lb-row-legendary-transformed::after,
-  .lb-row-pending-reincarnation::after,
-  .lb-row-pending-tribulation::after,
-  .lb-lvl-aura-3::after,
-  .lb-lvl-aura-8::after{ display:none !important; animation:none !important; }
-
   /* ===== Huy Hiệu "Tốc Độ Ánh Sáng" (Thử Thách Thời Gian) ===== */
   .lightspeed-panel{
     background:linear-gradient(135deg, var(--accent-light), var(--paper-dark));
@@ -1860,6 +1850,7 @@
   <button data-view="classtest" id="classtest-nav-btn" style="display:none;"><span class="tab-icon">📝</span><span class="tab-label">KT Trên Lớp</span></button>
   <button data-view="dictation"><span class="tab-icon">🎧</span><span class="tab-label">Chép chính tả</span></button>
   <button data-view="leaderboard"><span class="tab-icon">🏆</span><span class="tab-label">Xếp hạng</span></button>
+  <button data-view="thebai"><span class="tab-icon">🃏</span><span class="tab-label">Thẻ bài</span></button>
   <button data-view="feed"><span class="tab-icon">📢</span><span class="tab-label">Bảng tin</span></button>
   <button data-view="progress"><span class="tab-icon">📈</span><span class="tab-label">Tiến độ</span></button>
   <button data-view="manage"><span class="tab-icon">📚</span><span class="tab-label">Kho từ</span></button>
@@ -2159,6 +2150,8 @@
       <div id="leaderboard-content-area"></div>
     </div>
   </section>
+
+    <section class="view" id="view-thebai"><div id="tb-root"></div></section>
 
   <!-- ============ ACTIVITY FEED VIEW ============ -->
   <section class="view" id="view-feed">
@@ -14138,6 +14131,254 @@ window.addEventListener("DOMContentLoaded", () => {
       applyLock();
     }catch(e){}
   }, 800);
+})();
+</script>
+
+<!-- ==== TÍNH NĂNG THẺ BÀI (thêm mới, độc lập) ==== -->
+<style id="thebai-css">
+  #view-thebai .tb-wrap{ background:var(--card-bg,#fff); border:3px solid var(--paper-darker,#ddd); border-radius:24px; padding:20px; }
+  #view-thebai .tb-note{ font-size:13px; color:var(--ink-soft,#666); font-weight:600; }
+  #view-thebai .tb-bag{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin:16px 0; }
+  #view-thebai .tb-c{ --c1:#66BB6A; --c2:#2E7D32; position:relative; width:118px; padding:12px 8px 10px; border-radius:18px; color:#fff; text-align:center; cursor:pointer;
+    background:linear-gradient(160deg,var(--c1),var(--c2)); box-shadow:0 5px 0 rgba(0,0,0,.2), inset 0 0 0 2px rgba(255,255,255,.4); transition:transform .15s; user-select:none; }
+  #view-thebai .tb-c:hover{ transform:translateY(-4px); }
+  #view-thebai .tb-c.sel{ transform:translateY(-8px); box-shadow:0 0 0 4px #FFD54F, 0 8px 0 rgba(0,0,0,.2); }
+  #view-thebai .tb-atk{ --c1:#EF5350; --c2:#B71C1C; }
+  #view-thebai .tb-def{ --c1:#42A5F5; --c2:#1565C0; }
+  #view-thebai .tb-cnt{ --c1:#AB47BC; --c2:#6A1B9A; }
+  #view-thebai .tb-spc{ --c1:#66BB6A; --c2:#2E7D32; }
+  #view-thebai .tb-ico{ width:64px; height:64px; margin:0 auto 8px; border-radius:50%; background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.55),rgba(255,255,255,.12));
+    box-shadow:inset 0 0 0 2px rgba(255,255,255,.55); display:flex; align-items:center; justify-content:center; font-size:34px; }
+  #view-thebai .tb-cn{ font-size:12px; font-weight:900; line-height:1.25; min-height:30px; display:flex; align-items:center; justify-content:center; }
+  #view-thebai .tb-ct{ margin-top:4px; font-size:10px; font-weight:800; opacity:.92; letter-spacing:.3px; }
+  #view-thebai .tb-slot{ width:118px; min-height:140px; border:3px dashed var(--paper-darker,#ccc); border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--ink-soft,#aaa); }
+  #view-thebai .tb-detail{ text-align:center; padding:14px; border:3px dashed #43A047; border-radius:20px; margin:8px 0 14px; }
+  #view-thebai .tb-dn{ font-size:17px; font-weight:900; }
+  #view-thebai .tb-desc{ font-size:13px; margin:8px auto 12px; max-width:440px; }
+  #view-thebai .tb-row{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+  #view-thebai .tb-msg{ margin:10px 0; padding:10px 14px; border-radius:14px; background:#FFF8E1; border:2px solid #FFC107; font-size:13px; font-weight:700; }
+  #view-thebai .tb-ward{ margin:10px 0; padding:10px 14px; border-radius:14px; background:#E3F2FD; border:2px solid #42A5F5; font-size:13px; font-weight:700; }
+  #view-thebai .tb-list{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-top:10px; }
+  #view-thebai .tb-item{ border:2px solid var(--paper-darker,#ddd); border-radius:14px; padding:10px; font-size:12px; }
+  @media (max-width:480px){ #view-thebai .tb-c,#view-thebai .tb-slot{ width:calc(50% - 10px); } }
+</style>
+<script id="thebai-js">
+(function(){
+  "use strict";
+  var $ = function(i){ return document.getElementById(i); };
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  var CARDS = {
+    thien_thach:{k:"atk",icon:"☄️",name:"Thiên Thạch Diệt Thế",type:"⚔️ Công kích",desc:"Chọn 1 bạn trong Top 3 XP: bạn ấy mất 10% XP, bạn nhận một nửa số XP đó, phần còn lại biến mất."},
+    ket_gioi:{k:"def",icon:"🛡️",name:"Kết Giới Hộ Thân",type:"🛡️ Kháng",desc:"Chặn 1 đòn công kích trong 24h."},
+    suoi_nguon:{k:"def",icon:"💧",name:"Suối Nguồn Sinh Mệnh",type:"🛡️ Kháng",desc:"Dùng trước khi bị đánh: vẫn bị mất, nhưng được hoàn lại đủ số đã mất."},
+    guong:{k:"cnt",icon:"🪞",name:"Gương Thần Phản Chiếu",type:"🔄 Phản công",desc:"Đòn đầu tiên trúng bạn bị bật ngược sang người tung, bạn không mất gì."},
+    phuc_lanh:{k:"spc",icon:"🍀",name:"Phúc Lành Giáng Xuống",type:"🎲 Đặc biệt",desc:"Nhận 20% số Trúc của 3 bạn ngẫu nhiên trong nhóm Trúc cao nhất, các bạn đó không bị trừ."},
+    mua_xuan:{k:"spc",icon:"🌧️",name:"Mưa Xuân Cành Trúc",type:"🎲 Đặc biệt",desc:"Nhận 5% số Trúc đang có của mình (tối thiểu 50, tối đa 1000)."},
+    kiep_phu:{k:"atk",icon:"🏴‍☠️",name:"Kiếp Phú Cành Trúc",type:"⚔️ Công kích",desc:"Hệ thống chọn ngẫu nhiên 1 trong 4 bạn có nhiều Trúc nhất lớp (trừ bạn và người đang ẩn thân), cướp ngẫu nhiên 5–20% Trúc của bạn ấy về túi mình. Kết Giới chặn, Gương bật ngược, Suối Nguồn hoàn lại (bạn chỉ nhận một nửa)."},
+    ban_tay_vang:{k:"atk",icon:"🖐️",name:"Bàn Tay Vàng",type:"⚔️ Công kích",desc:"Chọn 1 bạn trong lớp: cướp ngẫu nhiên 1 thẻ trong túi của bạn ấy. Chỉ Kết Giới chặn được. Bạn ấy túi trống thì không dùng được."},
+    an_than:{k:"def",icon:"🌫️",name:"Ẩn Thân Phù",type:"🛡️ Kháng",desc:"24h không ai chọn được bạn làm mục tiêu của thẻ công kích (Thiên Thạch, Thần Thâu, Bàn Tay Vàng, Kiếp Phú). Không cản thẻ có lợi như Đồng Tâm."},
+    dong_tam:{k:"spc",icon:"🤝",name:"Đồng Tâm Kết Nghĩa",type:"🎲 Đặc biệt",desc:"Chọn 1 bạn cùng lớp: cả hai cùng nhận +500 Trúc từ hệ thống."},
+    doi_van:{k:"spc",icon:"🔮",name:"Đổi Vận Bài",type:"🎲 Đặc biệt",desc:"Bỏ toàn bộ thẻ còn lại trong túi và bốc lại đúng số thẻ đó."},
+    than_thau:{k:"atk",icon:"🥷",name:"Thần Thâu Cành Trúc",type:"⚔️ Công kích",desc:"Chọn 1 bạn bất kỳ trong lớp: bạn ấy mất 10% Trúc (tối đa 1000), bạn nhận một nửa số đó, phần còn lại biến mất. Kết Giới chặn, Gương bật ngược, Suối Nguồn hoàn lại."}
+  };
+  var ERR = {already_drawn:"Hôm nay bạn đã bốc thẻ miễn phí rồi.",no_card:"Không tìm thấy thẻ này trong túi.",ward_active:"Bạn đang có 1 thẻ phòng thủ còn hiệu lực.",
+    target_not_top3:"Chỉ được chọn bạn trong Top 3 XP.",cannot_target_self:"Không thể tự đánh mình.",nothing_to_take:"Bạn đó chưa đủ XP/Trúc để lấy.",
+    no_target:"Chưa có bạn nào có Trúc để nhận.",teacher_not_allowed:"Giáo viên không chơi thẻ bài.",network:"Không kết nối được máy chủ, thử lại sau.",
+    free_draw_available:"Bạn vẫn còn lượt bốc miễn phí hôm nay.",max_draws:"Hôm nay bạn đã bốc tối đa 2 lần.",
+    bag_full:"Túi đã đủ 4 thẻ. Hãy dùng hoặc bỏ 1 thẻ để bốc thêm.",not_enough_bamboo:"Không đủ 1000 Cành Trúc để bốc thêm.",
+    missing_target:"Hãy chọn 1 bạn làm mục tiêu.",target_not_in_class:"Bạn này không thuộc lớp của bạn.",target_is_teacher:"Không thể chọn giáo viên.",
+    target_hidden:"Bạn này đang ẩn thân, không chọn được.",no_rob_target:"Chưa có bạn nào để cướp (chưa ai có Trúc hoặc đều đang ẩn thân).",target_bag_empty:"Túi của bạn này đang trống.",stealth_active:"Bạn đang ẩn thân rồi.",no_other_cards:"Túi không còn thẻ nào khác để đổi vận."};
+  try{
+    if(typeof SUPABASE_ACTIONS_!=="undefined"){
+      SUPABASE_ACTIONS_.card_get_state={fn:"card_get_state",params:{username:"p_username",className:"p_class"}};
+      SUPABASE_ACTIONS_.card_draw={fn:"card_draw",params:{username:"p_username"}};
+      SUPABASE_ACTIONS_.card_buy_draw={fn:"card_buy_draw",params:{username:"p_username"}};
+      SUPABASE_ACTIONS_.card_use={fn:"card_use",params:{username:"p_username",className:"p_class",card:"p_card",target:"p_target"}};
+      SUPABASE_ACTIONS_.card_discard={fn:"card_discard",params:{username:"p_username",card:"p_card"}};
+    }
+  }catch(e){}
+  var MATE={
+    than_thau:{note:"Chọn 1 bạn trong lớp để thâu Trúc:",btn:"🥷 Thâu!",cls:"btn-bad",atk:true},
+    ban_tay_vang:{note:"Chọn 1 bạn để cướp ngẫu nhiên 1 thẻ:",btn:"🖐️ Cướp!",cls:"btn-bad",atk:true},
+    dong_tam:{note:"Chọn 1 bạn để kết nghĩa (cả hai cùng +500 Trúc):",btn:"🤝 Kết nghĩa!",cls:"btn-ok",atk:false}
+  };
+  var st=null, sel=-1, picking=false, msg="", busy=false;
+  function ctx(){ try{ return (state && state.username && state.currentClassName) ? state : null; }catch(e){ return null; } }
+  function box(){ return $("tb-root"); }
+  function say(h){ var b=box(); if(b) b.innerHTML=h; }
+  async function load(){
+    if(!box()) return;
+    var s=ctx();
+    if(!s){ say('<p class="tb-note">Hãy đăng nhập và chọn lớp để chơi thẻ bài.</p>'); return; }
+    if(s.role==="teacher"){ say('<p class="tb-note">Giáo viên không chơi thẻ bài.</p>'); return; }
+    try{
+      var r=await callServer("card_get_state",{username:s.username,className:s.currentClassName});
+      if(!r||!r.ok){ say('<p class="tb-note">⚠️ Chưa tải được thẻ bài (đã chạy file SQL thẻ bài trên Supabase chưa?).</p>'); return; }
+      st=r; draw();
+    }catch(e){ say('<p class="tb-note">⚠️ Lỗi tải thẻ bài.</p>'); }
+  }
+  function cardHtml(id,i){
+    var c=CARDS[id];
+    return '<div class="tb-c tb-'+c.k+(i===sel?' sel':'')+'" data-tb="pick" data-i="'+i+'"><div class="tb-ico">'+c.icon+'</div><div class="tb-cn">'+esc(c.name)+'</div><div class="tb-ct">'+esc(c.type)+'</div></div>';
+  }
+  function draw(){
+    var bag=(st.bag||[]).filter(function(x){return CARDS[x];}), max=st.bagMax||4, n=st.drawsToday||0;
+    if(sel>=bag.length) sel=-1;
+    var h='<div class="tb-wrap"><h3 style="margin:0 0 4px;">🃏 Túi thẻ ('+bag.length+'/'+max+')</h3><div class="tb-note">Mỗi ngày bốc 1 thẻ miễn phí, bốc thêm 1 lần bằng '+(st.extraCost||1000)+' 🎋 (tối đa 2 lần/ngày). Túi giữ tối đa '+max+' thẻ, thẻ không hết hạn.</div>';
+    if(msg) h+='<div class="tb-msg">'+esc(msg)+'</div>';
+    if(st.ward && CARDS[st.ward]){
+      h+='<div class="tb-ward">'+CARDS[st.ward].icon+' Đang bật: '+esc(CARDS[st.ward].name)+' (hết hạn '+esc(new Date(st.wardExpires).toLocaleString("vi-VN"))+')</div>';
+    }
+    if(st.stealthExpires){
+      h+='<div class="tb-ward">🌫️ Đang ẩn thân (hết hạn '+esc(new Date(st.stealthExpires).toLocaleString("vi-VN"))+')</div>';
+    }
+    h+='<div class="tb-bag">';
+    for(var i=0;i<max;i++) h+= bag[i] ? cardHtml(bag[i],i) : '<div class="tb-slot">＋</div>';
+    h+='</div>';
+    if(sel>=0 && bag[sel]){
+      var k=CARDS[bag[sel]];
+      h+='<div class="tb-detail"><div class="tb-dn">'+k.icon+' '+esc(k.name)+'</div><div class="tb-desc">'+esc(k.desc)+'</div>';
+      if(bag[sel]==="thien_thach" && picking){
+        h+='<div class="tb-note">Chọn mục tiêu trong Top 3 XP:</div><div class="tb-row">';
+        (st.top3||[]).forEach(function(t,i){
+          var me=ctx()&&String(t.username).toLowerCase()===String(ctx().username).toLowerCase();
+          h+='<button class="btn btn-bad" data-tb="hit" data-u="'+esc(t.username)+'"'+((me||t.hidden)?' disabled':'')+'>#'+(i+1)+' '+esc(t.displayName)+(t.hidden?' 🌫️':'')+'</button>';
+        });
+        h+='</div><div class="tb-row"><button class="btn btn-outline" data-tb="cancel">Hủy</button></div>';
+      } else if(MATE[bag[sel]] && picking){
+        var mc=MATE[bag[sel]];
+        h+='<div class="tb-note">'+mc.note+'</div><div class="tb-row"><select id="tb-mate" style="max-width:100%;padding:6px;"><option value="">— Chọn bạn —</option>';
+        (st.mates||[]).forEach(function(m){ var hid=mc.atk&&m.hidden; h+='<option value="'+esc(m.username)+'"'+(hid?' disabled':'')+'>'+esc(m.displayName)+(hid?' 🌫️ (ẩn thân)':'')+'</option>'; });
+        h+='</select><button class="btn '+mc.cls+'" data-tb="steal">'+mc.btn+'</button><button class="btn btn-outline" data-tb="cancel">Hủy</button></div>';
+      } else h+='<div class="tb-row"><button class="btn btn-ok" data-tb="use">✨ Dùng thẻ</button><button class="btn btn-outline" data-tb="drop">🗑️ Bỏ thẻ</button></div>';
+      h+='</div>';
+    } else if(bag.length) h+='<div class="tb-note" style="text-align:center;">Bấm vào 1 thẻ để xem và dùng.</div>';
+    h+='<div class="tb-row" style="margin:14px 0;">';
+    if(n>=2) h+='<div class="tb-note">Hôm nay bạn đã bốc tối đa 2 lần. Mai bốc tiếp nhé!</div>';
+    else if(bag.length>=max) h+='<div class="tb-note">Túi đã đầy ('+max+'/'+max+'): hãy dùng hoặc bỏ 1 thẻ để bốc thêm.</div>';
+    else if(n===0) h+='<button class="btn btn-ok" data-tb="draw">🎴 Bốc thẻ hôm nay (miễn phí)</button>';
+    else h+='<button class="btn btn-ok" data-tb="buy">🎴 Bốc thêm ('+(st.extraCost||1000)+' 🎋)</button>';
+    h+='</div><div class="tb-note">Các thẻ hiện có:</div><div class="tb-list">';
+    Object.keys(CARDS).forEach(function(id){ var c=CARDS[id]; h+='<div class="tb-item"><b>'+c.icon+' '+esc(c.name)+'</b><br>'+esc(c.type)+'<br>'+esc(c.desc)+'</div>'; });
+    say(h+'</div></div>');
+  }
+  function report(r){
+    var t=r.target||"";
+    if(r.card==="kiep_phu"){
+      switch(r.outcome){
+        case "hit": return "🏴‍☠️ Cướp của "+t+" "+r.loss+" Trúc ("+r.pct+"%): bạn nhận +"+r.gain+" Trúc.";
+        case "blocked": return "🛡️ "+t+" có Kết Giới, đòn bị chặn đứng!";
+        case "refunded": return "💧 "+t+" có Suối Nguồn nên được hoàn lại đủ. Bạn vẫn nhận +"+r.gain+" Trúc.";
+        case "reflected": return "🪞 "+t+" có Gương Thần, đòn bật ngược! Bạn mất "+r.loss+" Trúc.";
+      }
+    }
+    if(r.outcome==="stealth_set") return "🌫️ Đã ẩn thân trong 24h.";
+    if(r.card==="dong_tam") return "🤝 Kết nghĩa với "+t+": cả hai cùng nhận +"+r.amount+" Trúc!";
+    if(r.card==="doi_van") return "🔮 Đã đổi vận: bốc lại "+r.count+" thẻ trong túi.";
+    if(r.card==="ban_tay_vang"){
+      if(r.outcome==="blocked") return "🛡️ "+t+" có Kết Giới, Bàn Tay Vàng bị chặn đứng!";
+      var sc=CARDS[r.stolen]; return "🖐️ Cướp được từ "+t+": "+(sc?sc.icon+" "+sc.name:"1 thẻ")+"!";
+    }
+    if(r.card==="mua_xuan") return "🌧️ Nhận +"+r.amount+" Cành Trúc!";
+    if(r.card==="than_thau"){
+      switch(r.outcome){
+        case "hit": return "🥷 Trúng "+t+": họ mất "+r.loss+" Trúc, bạn nhận +"+r.gain+" Trúc.";
+        case "blocked": return "🛡️ "+t+" có Kết Giới, đòn bị chặn đứng!";
+        case "refunded": return "💧 "+t+" có Suối Nguồn nên được hoàn lại đủ. Bạn vẫn nhận +"+r.gain+" Trúc.";
+        case "reflected": return "🪞 "+t+" có Gương Thần, đòn bật ngược! Bạn mất "+r.loss+" Trúc.";
+      }
+    }
+    switch(r.outcome){
+      case "ward_set": return "Đã kích hoạt thẻ phòng thủ trong 24h.";
+      case "blessed": return "🍀 Nhận "+r.amount+" Trúc từ: "+r.names+".";
+      case "hit": return "☄️ Trúng "+t+": họ mất "+r.loss+" XP, bạn nhận +"+r.gain+" XP.";
+      case "blocked": return "🛡️ "+t+" có Kết Giới, đòn bị chặn đứng!";
+      case "refunded": return "💧 "+t+" có Suối Nguồn nên được hoàn lại đủ. Bạn vẫn nhận +"+r.gain+" XP.";
+      case "reflected": return "🪞 "+t+" có Gương Thần, đòn bật ngược! Bạn mất "+r.loss+" XP.";
+    }
+    return "Xong!";
+  }
+  function announce(r,cid){
+    try{
+      if(typeof addActivityLog!=="function") return;
+      var s=ctx(), c=CARDS[cid]; if(!s||!c) return;
+      var me=esc(s.studentName||s.username), t=esc(r.target||""), txt;
+      if(cid==="kiep_phu"){
+        switch(r.outcome){
+          case "hit": txt="🏴‍☠️ "+me+" dùng thẻ Kiếp Phú Cành Trúc, cướp "+r.gain+" Trúc ("+r.pct+"%) của "+t+"!"; break;
+          case "blocked": txt="🏴‍☠️ "+me+" dùng thẻ Kiếp Phú lên "+t+" nhưng bị Kết Giới Hộ Thân chặn đứng! 🛡️"; break;
+          case "refunded": txt="🏴‍☠️ "+me+" dùng thẻ Kiếp Phú lên "+t+": được Suối Nguồn Sinh Mệnh hoàn lại đủ 💧, "+me+" vẫn nhận +"+r.gain+" Trúc!"; break;
+          case "reflected": txt="🏴‍☠️ "+me+" dùng thẻ Kiếp Phú lên "+t+" nhưng bị Gương Thần Phản Chiếu bật ngược 🪞, "+me+" mất "+r.loss+" Trúc!"; break;
+          default: return;
+        }
+        addActivityLog(txt); return;
+      }
+      if(cid==="an_than"){ addActivityLog("🌫️ "+me+" vừa dùng thẻ Ẩn Thân Phù, 24h không ai chọn được!"); return; }
+      if(cid==="dong_tam"){ addActivityLog("🤝 "+me+" dùng thẻ Đồng Tâm Kết Nghĩa với "+t+": cả hai cùng nhận +"+r.amount+" Cành Trúc!"); return; }
+      if(cid==="doi_van"){ addActivityLog("🔮 "+me+" dùng thẻ Đổi Vận Bài, bốc lại cả túi bài!"); return; }
+      if(cid==="ban_tay_vang"){
+        addActivityLog(r.outcome==="blocked" ? "🖐️ "+me+" dùng Bàn Tay Vàng lên "+t+" nhưng bị Kết Giới Hộ Thân chặn đứng! 🛡️" : "🖐️ "+me+" dùng Bàn Tay Vàng cướp 1 thẻ của "+t+"!");
+        return;
+      }
+      if(cid==="mua_xuan"){ addActivityLog("🌧️ "+me+" dùng thẻ Mưa Xuân Cành Trúc, nhận "+r.amount+" Cành Trúc!"); return; }
+      if(cid==="than_thau"){
+        switch(r.outcome){
+          case "hit": txt="🥷 "+me+" dùng thẻ Thần Thâu Cành Trúc lên "+t+": "+t+" mất "+r.loss+" Trúc, "+me+" nhận +"+r.gain+" Trúc!"; break;
+          case "blocked": txt="🥷 "+me+" dùng thẻ Thần Thâu lên "+t+" nhưng bị Kết Giới Hộ Thân chặn đứng! 🛡️"; break;
+          case "refunded": txt="🥷 "+me+" dùng thẻ Thần Thâu lên "+t+": được Suối Nguồn Sinh Mệnh hoàn lại đủ 💧, "+me+" vẫn nhận +"+r.gain+" Trúc!"; break;
+          case "reflected": txt="🥷 "+me+" dùng thẻ Thần Thâu lên "+t+" nhưng bị Gương Thần Phản Chiếu bật ngược 🪞, "+me+" mất "+r.loss+" Trúc!"; break;
+          default: return;
+        }
+        addActivityLog(txt); return;
+      }
+      switch(r.outcome){
+        case "ward_set": txt=c.icon+" "+me+" vừa dùng thẻ "+c.name+"!"; break;
+        case "blessed": txt="🍀 "+me+" dùng thẻ Phúc Lành Giáng Xuống, nhận "+r.amount+" Cành Trúc từ "+esc(r.names)+"!"; break;
+        case "hit": txt="☄️ "+me+" dùng thẻ Thiên Thạch Diệt Thế lên "+t+": "+t+" mất "+r.loss+" XP, "+me+" nhận +"+r.gain+" XP!"; break;
+        case "blocked": txt="☄️ "+me+" dùng thẻ Thiên Thạch Diệt Thế lên "+t+" nhưng bị Kết Giới Hộ Thân chặn đứng! 🛡️"; break;
+        case "refunded": txt="☄️ "+me+" dùng thẻ Thiên Thạch Diệt Thế lên "+t+": được Suối Nguồn Sinh Mệnh hoàn lại đủ 💧, "+me+" vẫn nhận +"+r.gain+" XP!"; break;
+        case "reflected": txt="☄️ "+me+" dùng thẻ Thiên Thạch Diệt Thế lên "+t+" nhưng bị Gương Thần Phản Chiếu bật ngược 🪞, "+me+" mất "+r.loss+" XP!"; break;
+        default: return;
+      }
+      addActivityLog(txt);
+    }catch(e){}
+  }
+  async function refreshMine(){
+    try{ await pollOwnProgressFromServer(); }catch(e){}
+    try{ await refreshServerRoster(); }catch(e){}
+    try{ updateGamificationUI(); }catch(e){}
+  }
+  async function act(kind,target){
+    var s=ctx(); if(!s||busy) return; busy=true;
+    try{
+      var bag=(st&&st.bag)||[], cid=bag[sel], r;
+      if(kind==="draw") r=await callServer("card_draw",{username:s.username});
+      else if(kind==="buy") r=await callServer("card_buy_draw",{username:s.username});
+      else if(kind==="drop") r=await callServer("card_discard",{username:s.username,card:cid});
+      else r=await callServer("card_use",{username:s.username,className:s.currentClassName,card:cid,target:target||null});
+      if(!r||!r.ok){ msg=ERR[r&&r.error]||("Lỗi: "+(r&&r.error||"không rõ")); }
+      else if(kind==="draw"||kind==="buy"){
+        msg="Bạn bốc được: "+CARDS[r.card].icon+" "+CARDS[r.card].name+"!"+(kind==="buy"?" (-1000 🎋)":"");
+        if(kind==="buy") await refreshMine();
+      } else if(kind==="drop"){ msg="Đã bỏ thẻ "+CARDS[cid].name+"."; sel=-1; }
+      else { msg=report(r); announce(r,cid); picking=false; sel=-1; await refreshMine(); }
+    }catch(e){ msg="Có lỗi, thử lại sau."; }
+    busy=false; load();
+  }
+  document.addEventListener("click",function(ev){
+    var b=ev.target.closest&&ev.target.closest("[data-tb]"); if(!b||!$("view-thebai")||!$("view-thebai").contains(b)||!st) return;
+    var a=b.getAttribute("data-tb"), bag=st.bag||[];
+    if(a==="pick"){ var i=parseInt(b.getAttribute("data-i"),10); sel=(sel===i)?-1:i; picking=false; draw(); }
+    else if(a==="draw") act("draw");
+    else if(a==="buy"){ if(confirm("Dùng 1000 Cành Trúc để bốc thêm 1 thẻ?")) act("buy"); }
+    else if(a==="use"){ if(bag[sel]==="thien_thach"||MATE[bag[sel]]){ picking=true; draw(); } else if(bag[sel]==="doi_van"){ if(confirm("Đổi vận sẽ bỏ hết thẻ còn lại trong túi và bốc lại ngẫu nhiên. Tiếp tục?")) act("use"); } else act("use"); }
+    else if(a==="steal"){ var mt=$("tb-mate"); if(mt&&mt.value) act("use",mt.value); else { msg=ERR.missing_target; draw(); } }
+    else if(a==="hit") act("use",b.getAttribute("data-u"));
+    else if(a==="drop"){ if(CARDS[bag[sel]]&&confirm("Bỏ thẻ "+CARDS[bag[sel]].name+"? Không thể lấy lại.")) act("drop"); }
+    else if(a==="cancel"){ picking=false; draw(); }
+  });
+  var nb=document.querySelector('nav.tabs button[data-view="thebai"]');
+  if(nb) nb.addEventListener("click",function(){ msg=""; picking=false; sel=-1; load(); });
 })();
 </script>
 
