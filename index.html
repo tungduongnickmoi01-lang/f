@@ -789,6 +789,12 @@
     animation:legendSheen 2.5s linear infinite, legendGlow 1.6s ease-in-out infinite;
     vertical-align:middle; text-shadow:0 1px 2px rgba(0,0,0,0.35);
   }
+  /* FIX ĐỘ TƯƠNG PHẢN: nhãn "cần Thú Truyền Thuyết" trước đây chữ vàng #FFC107 nằm thẳng trên nền cam/vàng/tím của
+     dòng Bảng Xếp Hạng nên mờ. Giờ có nền viên thuốc tím đậm + chữ vàng nhạt, đọc rõ trên MỌI nền dòng. Chỉ ảnh hưởng nhãn này. */
+  .lb-legendary-lock-tag{
+    display:inline-block; background:#4A148C; color:#FFE082 !important; border:1px solid #FFC107;
+    border-radius:999px; padding:0 8px; line-height:1.7; text-shadow:none;
+  }
   /* Thú Truyền Thuyết: viền cầu vồng quay quanh + quét sáng nhanh hơn + icon lấp lánh — "lung linh" hơn hẳn Thần Thú/Tiên Thú thường */
   .lb-transform-legendary{
     position:relative; overflow:visible; padding:4px 12px; font-size:11.5px;
@@ -11388,12 +11394,22 @@ function renderLightspeedBadgeHtml(badgeIds = []) {
    Thú thuộc nhóm Truyền Thuyết được thêm hiệu ứng "lung linh" mạnh hơn hẳn
    (viền cầu vồng quay, tia sáng quét nhanh hơn, icon lấp lánh ✨) để nổi bật
    là cực phẩm hiếm nhất trong Bảng Xếp Hạng. */
+/* FIX ĐỘ TƯƠNG PHẢN cho chip Linh Thú trên Bảng Xếp Hạng: chip mặc định chữ TRẮNG, nhưng thú có màu nền rất sáng
+   (vd Heo Con Hồng Phấn #F8BBD0) làm chữ trắng gần như biến mất. Nếu màu thú sáng, dùng chữ tối cùng tông và bỏ bóng đen. */
+function spiritChipTextStyle(animal) {
+  const h = String(animal?.color || "#D500F9").replace("#", "");
+  if (h.length !== 6) return "";
+  const r = parseInt(h.substring(0, 2), 16), g = parseInt(h.substring(2, 4), 16), b = parseInt(h.substring(4, 6), 16);
+  if ([r, g, b].some(isNaN)) return "";
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.62 ? ` color:${shadeColor(animal.color, -0.72)}; text-shadow:none;` : "";
+}
 function renderTransformBadgeHtml(spiritAnimalId) {
   const animal = getSpiritAnimalById(spiritAnimalId);
   if (!animal) return "";
   const isLegendary = animal.category === "legendary";
   const cls = `lb-transform-badge${isLegendary ? " lb-transform-legendary" : ""}`;
-  const style = spiritGradientBg(animal);
+  const style = spiritGradientBg(animal) + spiritChipTextStyle(animal);
   const animalChip = `<span class="${cls}" style="${style}" title="${animal.name}">${isLegendary ? '<span class="lb-legendary-sparkle">✨</span>' : ''}${animal.icon} ${animal.name}${isLegendary ? ' <span class="lb-legendary-sparkle">✨</span>' : ''}</span>`;
   if (!isLegendary) return animalChip;
   /* Huy hiệu "✨ Truyền Thuyết" riêng biệt (ngoài chip tên Linh Thú ở trên) —
@@ -11537,7 +11553,7 @@ function renderLeaderboardContent() {
               <span style="font-size:24px;" class="${medalClass}">${animal ? animal.icon : medal}</span>
               <div>
                 <strong style="color:var(--seal-dark); font-size:15px;">#${idx + 1} ${p.name}${typeof renderDebtTagHtml_ === "function" ? renderDebtTagHtml_(p) : ""} ${isMe ? ' (Bạn)' : ''}${renderBadgeChipsHtml(p.badges)}${renderLightspeedBadgeHtml(p.badges)}${renderLevelAuraTagHtml(p.level)}${animal ? renderTransformBadgeHtml(p.spiritAnimal) : ''}${renderReincarnationBadgeHtml(p.reincarnationCount)}${renderTribulationBadgeHtml(p.tribulationCount)}</strong>
-                <div class="lb-pending-status-text" style="font-size:12px; color:${isPendingTribulation ? '#FFEE58' : isPendingReincarnation ? '#C62828' : 'var(--ink-soft)'}; font-weight:${(isPendingTribulation || isPendingReincarnation) ? '800' : '400'};">Trạng thái: ${p.outfit} · ${levelStatusHtml}${p.charmLocked ? ` <span style="color:#D81B60; font-weight:800;" title="Đủ XP nhưng thiếu Mị Lực để lên Level tiếp">🔒 cần thêm 💖</span>` : ''}${isLegendaryGateLocked ? ` <span style="color:#FFC107; font-weight:800;" title="Đã Level 65 nhưng chưa hóa hình Linh Thú Truyền Thuyết">✨🔒 cần Thú Truyền Thuyết</span>` : ''}</div>
+                <div class="lb-pending-status-text" style="font-size:12px; color:${isPendingTribulation ? '#FFEE58' : isPendingReincarnation ? '#C62828' : 'var(--ink-soft)'}; font-weight:${(isPendingTribulation || isPendingReincarnation) ? '800' : '400'};">Trạng thái: ${p.outfit} · ${levelStatusHtml}${p.charmLocked ? ` <span style="color:#D81B60; font-weight:800;" title="Đủ XP nhưng thiếu Mị Lực để lên Level tiếp">🔒 cần thêm 💖</span>` : ''}${isLegendaryGateLocked ? ` <span class="lb-legendary-lock-tag" style="font-weight:800;" title="Đã Level 65 nhưng chưa hóa hình Linh Thú Truyền Thuyết">✨🔒 cần Thú Truyền Thuyết</span>` : ''}</div>
               </div>
             </div>
             <div style="display:flex; align-items:center; gap:14px;">
@@ -11633,7 +11649,7 @@ function renderLeaderboardContent() {
               <span style="font-size:24px;" class="${medalClass}">${animal ? animal.icon : medal}</span>
               <div>
                 <strong style="color:var(--seal-dark); font-size:15px;">#${idx + 1} ${p.name}${typeof renderDebtTagHtml_ === "function" ? renderDebtTagHtml_(p) : ""} ${isMe ? ' (Bạn)' : ''}${renderBadgeChipsHtml(p.badges)}${renderLightspeedBadgeHtml(p.badges)}${renderLevelAuraTagHtml(p.level)}${animal ? renderTransformBadgeHtml(p.spiritAnimal) : ''}${renderReincarnationBadgeHtml(p.reincarnationCount)}${renderTribulationBadgeHtml(p.tribulationCount)}</strong>
-                <div style="font-size:12px; color:var(--ink-soft); margin-top:2px;">Đạo cụ: ${decoIcons}${isLegendaryGateLocked ? ` <span style="color:#FFC107; font-weight:800;" title="Đã Level 65 nhưng chưa hóa hình Linh Thú Truyền Thuyết">✨🔒 cần Thú Truyền Thuyết</span>` : ''}</div>
+                <div style="font-size:12px; color:var(--ink-soft); margin-top:2px;">Đạo cụ: ${decoIcons}${isLegendaryGateLocked ? ` <span class="lb-legendary-lock-tag" style="font-weight:800;" title="Đã Level 65 nhưng chưa hóa hình Linh Thú Truyền Thuyết">✨🔒 cần Thú Truyền Thuyết</span>` : ''}</div>
               </div>
             </div>
             <div style="display:flex; align-items:center; gap:12px;">
@@ -14171,9 +14187,9 @@ window.addEventListener("DOMContentLoaded", () => {
     thien_thach:{k:"atk",icon:"☄️",name:"Thiên Thạch Diệt Thế",type:"⚔️ Công kích",desc:"Chọn 1 bạn trong Top 3 XP: bạn ấy mất 10% XP, bạn nhận một nửa số XP đó, phần còn lại biến mất."},
     ket_gioi:{k:"def",icon:"🛡️",name:"Kết Giới Hộ Thân",type:"🛡️ Kháng",desc:"Chặn 1 đòn công kích trong 24h."},
     suoi_nguon:{k:"def",icon:"💧",name:"Suối Nguồn Sinh Mệnh",type:"🛡️ Kháng",desc:"Dùng trước khi bị đánh: vẫn bị mất, nhưng được hoàn lại đủ số đã mất."},
-    guong:{k:"cnt",icon:"🪞",name:"Gương Thần Phản Chiếu",type:"🔄 Phản công",desc:"Đòn đầu tiên trúng bạn bị bật ngược sang người tung, bạn không mất gì."},
+    guong:{k:"cnt",icon:"🪞",name:"Gương Thần Phản Chiếu",type:"🔄 Phản công",desc:"Bật trong 24h (mỗi lúc chỉ có 1 thẻ phòng thủ). Đòn công kích đầu tiên nhắm vào bạn (Thiên Thạch, Thần Thâu, Kiếp Phú) bị bật ngược: bạn không mất gì, người tung mất đúng số XP/Trúc lẽ ra bạn mất (tối đa bằng số họ đang có) và không ai nhận số đó. Không phản được Bàn Tay Vàng."},
     phuc_lanh:{k:"spc",icon:"🍀",name:"Phúc Lành Giáng Xuống",type:"🎲 Đặc biệt",desc:"Nhận 20% số Trúc của 3 bạn ngẫu nhiên trong nhóm Trúc cao nhất, các bạn đó không bị trừ."},
-    mua_xuan:{k:"spc",icon:"🌧️",name:"Mưa Xuân Cành Trúc",type:"🎲 Đặc biệt",desc:"Nhận 5% số Trúc đang có của mình (tối thiểu 50, tối đa 1000)."},
+    mua_xuan:{k:"spc",icon:"🌧️",name:"Mưa Xuân Cành Trúc",type:"🎲 Đặc biệt",desc:"Nhận ngẫu nhiên 5–30% số Trúc đang có của mình (tối thiểu 50, tối đa 5000)."},
     kiep_phu:{k:"atk",icon:"🏴‍☠️",name:"Kiếp Phú Cành Trúc",type:"⚔️ Công kích",desc:"Hệ thống chọn ngẫu nhiên 1 trong 4 bạn có nhiều Trúc nhất lớp (trừ bạn và người đang ẩn thân), cướp ngẫu nhiên 5–20% Trúc của bạn ấy về túi mình. Kết Giới chặn, Gương bật ngược, Suối Nguồn hoàn lại (bạn chỉ nhận một nửa)."},
     ban_tay_vang:{k:"atk",icon:"🖐️",name:"Bàn Tay Vàng",type:"⚔️ Công kích",desc:"Chọn 1 bạn trong lớp: cướp ngẫu nhiên 1 thẻ trong túi của bạn ấy. Chỉ Kết Giới chặn được. Bạn ấy túi trống thì không dùng được."},
     an_than:{k:"def",icon:"🌫️",name:"Ẩn Thân Phù",type:"🛡️ Kháng",desc:"24h không ai chọn được bạn làm mục tiêu của thẻ công kích (Thiên Thạch, Thần Thâu, Bàn Tay Vàng, Kiếp Phú). Không cản thẻ có lợi như Đồng Tâm."},
@@ -14279,7 +14295,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if(r.outcome==="blocked") return "🛡️ "+t+" có Kết Giới, Bàn Tay Vàng bị chặn đứng!";
       var sc=CARDS[r.stolen]; return "🖐️ Cướp được từ "+t+": "+(sc?sc.icon+" "+sc.name:"1 thẻ")+"!";
     }
-    if(r.card==="mua_xuan") return "🌧️ Nhận +"+r.amount+" Cành Trúc!";
+    if(r.card==="mua_xuan") return "🌧️ Nhận +"+r.amount+" Cành Trúc"+(r.pct?" ("+r.pct+"%)":"")+"!";
     if(r.card==="than_thau"){
       switch(r.outcome){
         case "hit": return "🥷 Trúng "+t+": họ mất "+r.loss+" Trúc, bạn nhận +"+r.gain+" Trúc.";
@@ -14320,7 +14336,7 @@ window.addEventListener("DOMContentLoaded", () => {
         addActivityLog(r.outcome==="blocked" ? "🖐️ "+me+" dùng Bàn Tay Vàng lên "+t+" nhưng bị Kết Giới Hộ Thân chặn đứng! 🛡️" : "🖐️ "+me+" dùng Bàn Tay Vàng cướp 1 thẻ của "+t+"!");
         return;
       }
-      if(cid==="mua_xuan"){ addActivityLog("🌧️ "+me+" dùng thẻ Mưa Xuân Cành Trúc, nhận "+r.amount+" Cành Trúc!"); return; }
+      if(cid==="mua_xuan"){ addActivityLog("🌧️ "+me+" dùng thẻ Mưa Xuân Cành Trúc, nhận "+r.amount+" Cành Trúc"+(r.pct?" ("+r.pct+"%)":"")+"!"); return; }
       if(cid==="than_thau"){
         switch(r.outcome){
           case "hit": txt="🥷 "+me+" dùng thẻ Thần Thâu Cành Trúc lên "+t+": "+t+" mất "+r.loss+" Trúc, "+me+" nhận +"+r.gain+" Trúc!"; break;
