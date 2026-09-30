@@ -790,10 +790,10 @@
     vertical-align:middle; text-shadow:0 1px 2px rgba(0,0,0,0.35);
   }
   /* FIX ĐỘ TƯƠNG PHẢN: nhãn "cần Thú Truyền Thuyết" trước đây chữ vàng #FFC107 nằm thẳng trên nền cam/vàng/tím của
-     dòng Bảng Xếp Hạng nên mờ. Giờ có nền viên thuốc tím đậm + chữ vàng nhạt, đọc rõ trên MỌI nền dòng. Chỉ ảnh hưởng nhãn này. */
+     dòng Bảng Xếp Hạng nên mờ. Đã bỏ nền/viền viên thuốc theo yêu cầu: giờ là chữ thường (đậm) giống dòng trạng thái \"Chờ Luân Hồi/Độ Kiếp\", chỉ khác màu (cam đậm #E65100). Chỉ ảnh hưởng nhãn này. */
   .lb-legendary-lock-tag{
-    display:inline-block; background:#4A148C; color:#FFE082 !important; border:1px solid #FFC107;
-    border-radius:999px; padding:0 8px; line-height:1.7; text-shadow:none;
+    display:inline; background:none; border:none; border-radius:0; padding:0;
+    color:#E65100 !important; text-shadow:none;
   }
   /* Thú Truyền Thuyết: viền cầu vồng quay quanh + quét sáng nhanh hơn + icon lấp lánh — "lung linh" hơn hẳn Thần Thú/Tiên Thú thường */
   .lb-transform-legendary{
@@ -14176,6 +14176,8 @@ window.addEventListener("DOMContentLoaded", () => {
   #view-thebai .tb-ward{ margin:10px 0; padding:10px 14px; border-radius:14px; background:#E3F2FD; border:2px solid #42A5F5; font-size:13px; font-weight:700; }
   #view-thebai .tb-list{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin-top:10px; }
   #view-thebai .tb-item{ border:2px solid var(--paper-darker,#ddd); border-radius:14px; padding:10px; font-size:12px; }
+  #view-thebai .tb-seal{ margin:10px 0; padding:10px 14px; border-radius:14px; background:#FFEBEE; border:2px solid #E53935; font-size:13px; font-weight:700; }
+  .tb-seal-tag{ display:inline-block; margin-left:6px; padding:2px 8px; border-radius:999px; background:#FFEBEE; border:1.5px solid #E53935; color:#B71C1C; font-size:11px; font-weight:800; vertical-align:middle; }
   @media (max-width:480px){ #view-thebai .tb-c,#view-thebai .tb-slot{ width:calc(50% - 10px); } }
 </style>
 <script id="thebai-js">
@@ -14195,7 +14197,9 @@ window.addEventListener("DOMContentLoaded", () => {
     an_than:{k:"def",icon:"🌫️",name:"Ẩn Thân Phù",type:"🛡️ Kháng",desc:"24h không ai chọn được bạn làm mục tiêu của thẻ công kích (Thiên Thạch, Thần Thâu, Bàn Tay Vàng, Kiếp Phú). Không cản thẻ có lợi như Đồng Tâm."},
     dong_tam:{k:"spc",icon:"🤝",name:"Đồng Tâm Kết Nghĩa",type:"🎲 Đặc biệt",desc:"Chọn 1 bạn cùng lớp: cả hai cùng nhận +500 Trúc từ hệ thống."},
     doi_van:{k:"spc",icon:"🔮",name:"Đổi Vận Bài",type:"🎲 Đặc biệt",desc:"Bỏ toàn bộ thẻ còn lại trong túi và bốc lại đúng số thẻ đó."},
-    than_thau:{k:"atk",icon:"🥷",name:"Thần Thâu Cành Trúc",type:"⚔️ Công kích",desc:"Chọn 1 bạn bất kỳ trong lớp: bạn ấy mất 10% Trúc (tối đa 1000), bạn nhận một nửa số đó, phần còn lại biến mất. Kết Giới chặn, Gương bật ngược, Suối Nguồn hoàn lại."}
+    than_thau:{k:"atk",icon:"🥷",name:"Thần Thâu Cành Trúc",type:"⚔️ Công kích",desc:"Chọn 1 bạn bất kỳ trong lớp: bạn ấy mất 10% Trúc (tối đa 1000), bạn nhận một nửa số đó, phần còn lại biến mất. Kết Giới chặn, Gương bật ngược, Suối Nguồn hoàn lại."},
+    phong_an:{k:"atk",icon:"🔒",name:"Phong Ấn Thẻ",type:"⚔️ Công kích",desc:"Chọn 1 bạn cùng lớp: trong 12h bạn ấy không dùng được thẻ công kích và không bật được thẻ phòng thủ mới (phòng thủ đã bật từ trước vẫn còn tác dụng). Bạn bị phong ấn sẽ hiện ghi chú trên Bảng Xếp Hạng. Kết Giới chặn được (bị tiêu), Ẩn Thân Phù làm bạn ấy không chọn được, Gương và Suối Nguồn không áp dụng."},
+    an_dau:{k:"spc",icon:"🕵️",name:"Ẩn Dấu Phù",type:"🎲 Đặc biệt",desc:"Trong 24h, bất kỳ thẻ nào bạn dùng cũng KHÔNG hiện ở Bảng Tin/thông báo lớp, không ai biết là bạn. Không ảnh hưởng hiệu quả của thẻ."}
   };
   var ERR = {already_drawn:"Hôm nay bạn đã bốc thẻ miễn phí rồi.",no_card:"Không tìm thấy thẻ này trong túi.",ward_active:"Bạn đang có 1 thẻ phòng thủ còn hiệu lực.",
     target_not_top3:"Chỉ được chọn bạn trong Top 3 XP.",cannot_target_self:"Không thể tự đánh mình.",nothing_to_take:"Bạn đó chưa đủ XP/Trúc để lấy.",
@@ -14203,7 +14207,7 @@ window.addEventListener("DOMContentLoaded", () => {
     free_draw_available:"Bạn vẫn còn lượt bốc miễn phí hôm nay.",max_draws:"Hôm nay bạn đã bốc tối đa 2 lần.",
     bag_full:"Túi đã đủ 4 thẻ. Hãy dùng hoặc bỏ 1 thẻ để bốc thêm.",not_enough_bamboo:"Không đủ 1000 Cành Trúc để bốc thêm.",
     missing_target:"Hãy chọn 1 bạn làm mục tiêu.",target_not_in_class:"Bạn này không thuộc lớp của bạn.",target_is_teacher:"Không thể chọn giáo viên.",
-    target_hidden:"Bạn này đang ẩn thân, không chọn được.",no_rob_target:"Chưa có bạn nào để cướp (chưa ai có Trúc hoặc đều đang ẩn thân).",target_bag_empty:"Túi của bạn này đang trống.",stealth_active:"Bạn đang ẩn thân rồi.",no_other_cards:"Túi không còn thẻ nào khác để đổi vận."};
+    target_hidden:"Bạn này đang ẩn thân, không chọn được.",no_rob_target:"Chưa có bạn nào để cướp (chưa ai có Trúc hoặc đều đang ẩn thân).",target_bag_empty:"Túi của bạn này đang trống.",stealth_active:"Bạn đang ẩn thân rồi.",no_other_cards:"Túi không còn thẻ nào khác để đổi vận.",trace_active:"Bạn đang ẩn dấu rồi.",sealed:"Bạn đang bị phong ấn: không dùng được thẻ công kích và không bật được thẻ phòng thủ mới.",already_sealed:"Bạn này đã đang bị phong ấn rồi."};
   try{
     if(typeof SUPABASE_ACTIONS_!=="undefined"){
       SUPABASE_ACTIONS_.card_get_state={fn:"card_get_state",params:{username:"p_username",className:"p_class"}};
@@ -14211,16 +14215,49 @@ window.addEventListener("DOMContentLoaded", () => {
       SUPABASE_ACTIONS_.card_buy_draw={fn:"card_buy_draw",params:{username:"p_username"}};
       SUPABASE_ACTIONS_.card_use={fn:"card_use",params:{username:"p_username",className:"p_class",card:"p_card",target:"p_target"}};
       SUPABASE_ACTIONS_.card_discard={fn:"card_discard",params:{username:"p_username",card:"p_card"}};
+      SUPABASE_ACTIONS_.card_use_trace={fn:"card_use_trace",params:{username:"p_username"}};
+      SUPABASE_ACTIONS_.card_get_trace={fn:"card_get_trace",params:{username:"p_username"}};
+      SUPABASE_ACTIONS_.card_use2={fn:"card_use_v2",params:{username:"p_username",className:"p_class",card:"p_card",target:"p_target"}};
+      SUPABASE_ACTIONS_.card_get_seals={fn:"card_get_seals",params:{className:"p_class"}};
     }
   }catch(e){}
   var MATE={
     than_thau:{note:"Chọn 1 bạn trong lớp để thâu Trúc:",btn:"🥷 Thâu!",cls:"btn-bad",atk:true},
     ban_tay_vang:{note:"Chọn 1 bạn để cướp ngẫu nhiên 1 thẻ:",btn:"🖐️ Cướp!",cls:"btn-bad",atk:true},
+    phong_an:{note:"Chọn 1 bạn để phong ấn trong 12h:",btn:"🔒 Phong ấn!",cls:"btn-bad",atk:true},
     dong_tam:{note:"Chọn 1 bạn để kết nghĩa (cả hai cùng +500 Trúc):",btn:"🤝 Kết nghĩa!",cls:"btn-ok",atk:false}
   };
   var st=null, sel=-1, picking=false, msg="", busy=false;
   function ctx(){ try{ return (state && state.username && state.currentClassName) ? state : null; }catch(e){ return null; } }
   function box(){ return $("tb-root"); }
+  /* Ẩn Dấu Phù: đang ẩn dấu thì mọi thẻ dùng ra sẽ không ghi vào Bảng Tin lớp */
+  function traceOn(){ return !!(st && st.traceExpires && new Date(st.traceExpires).getTime()>Date.now()); }
+  async function fetchTrace(username){
+    try{ var tr=await callServer("card_get_trace",{username:username}); return (tr&&tr.ok&&tr.traceExpires)||null; }catch(e){ return null; }
+  }
+  /* Phong Ấn Thẻ: danh sách bạn đang bị phong ấn trong lớp (hiện ghi chú trên Bảng Xếp Hạng) */
+  var seals=[], SEAL_BLOCK={thien_thach:1,than_thau:1,kiep_phu:1,ban_tay_vang:1,phong_an:1,ket_gioi:1,suoi_nguon:1,guong:1,an_than:1};
+  function sealExp(u){
+    if(!u) return 0; u=String(u).toLowerCase();
+    for(var i=0;i<seals.length;i++){
+      if(String(seals[i].username).toLowerCase()===u){ var t=new Date(seals[i].sealExpires).getTime(); return t>Date.now()?t:0; }
+    }
+    return 0;
+  }
+  function isSealed(u){ return sealExp(u)>0; }
+  function sealLeft(ms){ var m=Math.max(1,Math.ceil((ms-Date.now())/60000)); return m>=60 ? Math.floor(m/60)+"h"+(m%60?(m%60)+"p":"") : m+"p"; }
+  function lbActive(){ var v=$("view-leaderboard"); return !!(v&&v.classList.contains("active")); }
+  async function refreshSeals(){
+    var s=ctx(); if(!s) return;
+    try{
+      var r=await callServer("card_get_seals",{className:s.currentClassName});
+      if(r&&r.ok){
+        var nx=r.seals||[], changed=(JSON.stringify(nx)!==JSON.stringify(seals));
+        seals=nx;
+        if(changed){ try{ if(lbActive()&&typeof renderLeaderboardContent==="function") renderLeaderboardContent(); }catch(e){} }
+      }
+    }catch(e){}
+  }
   function say(h){ var b=box(); if(b) b.innerHTML=h; }
   async function load(){
     if(!box()) return;
@@ -14230,7 +14267,7 @@ window.addEventListener("DOMContentLoaded", () => {
     try{
       var r=await callServer("card_get_state",{username:s.username,className:s.currentClassName});
       if(!r||!r.ok){ say('<p class="tb-note">⚠️ Chưa tải được thẻ bài (đã chạy file SQL thẻ bài trên Supabase chưa?).</p>'); return; }
-      st=r; draw();
+      st=r; st.traceExpires=await fetchTrace(s.username); await refreshSeals(); draw();
     }catch(e){ say('<p class="tb-note">⚠️ Lỗi tải thẻ bài.</p>'); }
   }
   function cardHtml(id,i){
@@ -14248,6 +14285,13 @@ window.addEventListener("DOMContentLoaded", () => {
     if(st.stealthExpires){
       h+='<div class="tb-ward">🌫️ Đang ẩn thân (hết hạn '+esc(new Date(st.stealthExpires).toLocaleString("vi-VN"))+')</div>';
     }
+    if(traceOn()){
+      h+='<div class="tb-ward">🕵️ Đang ẩn dấu (hết hạn '+esc(new Date(st.traceExpires).toLocaleString("vi-VN"))+'): thẻ bạn dùng không hiện ở thông báo.</div>';
+    }
+    var _se=sealExp(ctx()&&ctx().username);
+    if(_se){
+      h+='<div class="tb-seal">🔒 Bạn đang bị phong ấn (hết hạn '+esc(new Date(_se).toLocaleString("vi-VN"))+'): không dùng được thẻ công kích và không bật được thẻ phòng thủ mới. Phòng thủ đã bật từ trước vẫn còn tác dụng.</div>';
+    }
     h+='<div class="tb-bag">';
     for(var i=0;i<max;i++) h+= bag[i] ? cardHtml(bag[i],i) : '<div class="tb-slot">＋</div>';
     h+='</div>';
@@ -14264,7 +14308,7 @@ window.addEventListener("DOMContentLoaded", () => {
       } else if(MATE[bag[sel]] && picking){
         var mc=MATE[bag[sel]];
         h+='<div class="tb-note">'+mc.note+'</div><div class="tb-row"><select id="tb-mate" style="max-width:100%;padding:6px;"><option value="">— Chọn bạn —</option>';
-        (st.mates||[]).forEach(function(m){ var hid=mc.atk&&m.hidden; h+='<option value="'+esc(m.username)+'"'+(hid?' disabled':'')+'>'+esc(m.displayName)+(hid?' 🌫️ (ẩn thân)':'')+'</option>'; });
+        (st.mates||[]).forEach(function(m){ var hid=mc.atk&&m.hidden, sl=(bag[sel]==="phong_an")&&isSealed(m.username); h+='<option value="'+esc(m.username)+'"'+((hid||sl)?' disabled':'')+'>'+esc(m.displayName)+(hid?' 🌫️ (ẩn thân)':'')+(sl?' 🔒 (đã bị phong ấn)':'')+'</option>'; });
         h+='</select><button class="btn '+mc.cls+'" data-tb="steal">'+mc.btn+'</button><button class="btn btn-outline" data-tb="cancel">Hủy</button></div>';
       } else h+='<div class="tb-row"><button class="btn btn-ok" data-tb="use">✨ Dùng thẻ</button><button class="btn btn-outline" data-tb="drop">🗑️ Bỏ thẻ</button></div>';
       h+='</div>';
@@ -14288,7 +14332,9 @@ window.addEventListener("DOMContentLoaded", () => {
         case "reflected": return "🪞 "+t+" có Gương Thần, đòn bật ngược! Bạn mất "+r.loss+" Trúc.";
       }
     }
+    if(r.outcome==="trace_set") return "🕵️ Đã ẩn dấu trong 24h: mọi thẻ bạn dùng sẽ không hiện ở thông báo.";
     if(r.outcome==="stealth_set") return "🌫️ Đã ẩn thân trong 24h.";
+    if(r.card==="phong_an") return r.outcome==="blocked" ? "🛡️ "+t+" có Kết Giới, Phong Ấn bị chặn đứng!" : "🔒 Đã phong ấn "+t+" trong 12h: bạn ấy không dùng được thẻ công kích và không bật được thẻ phòng thủ mới.";
     if(r.card==="dong_tam") return "🤝 Kết nghĩa với "+t+": cả hai cùng nhận +"+r.amount+" Trúc!";
     if(r.card==="doi_van") return "🔮 Đã đổi vận: bốc lại "+r.count+" thẻ trong túi.";
     if(r.card==="ban_tay_vang"){
@@ -14318,6 +14364,7 @@ window.addEventListener("DOMContentLoaded", () => {
     try{
       if(typeof addActivityLog!=="function") return;
       var s=ctx(), c=CARDS[cid]; if(!s||!c) return;
+      if(cid==="an_dau"||traceOn()) return; // Ẩn Dấu Phù: im lặng hoàn toàn
       var me=esc(s.studentName||s.username), t=esc(r.target||""), txt;
       if(cid==="kiep_phu"){
         switch(r.outcome){
@@ -14329,6 +14376,7 @@ window.addEventListener("DOMContentLoaded", () => {
         }
         addActivityLog(txt); return;
       }
+      if(cid==="phong_an"){ addActivityLog(r.outcome==="blocked" ? "🔒 "+me+" dùng Phong Ấn lên "+t+" nhưng bị Kết Giới Hộ Thân chặn đứng! 🛡️" : "🔒 "+me+" dùng thẻ Phong Ấn lên "+t+": 12h không dùng được thẻ công kích và không bật được phòng thủ mới!"); return; }
       if(cid==="an_than"){ addActivityLog("🌫️ "+me+" vừa dùng thẻ Ẩn Thân Phù, 24h không ai chọn được!"); return; }
       if(cid==="dong_tam"){ addActivityLog("🤝 "+me+" dùng thẻ Đồng Tâm Kết Nghĩa với "+t+": cả hai cùng nhận +"+r.amount+" Cành Trúc!"); return; }
       if(cid==="doi_van"){ addActivityLog("🔮 "+me+" dùng thẻ Đổi Vận Bài, bốc lại cả túi bài!"); return; }
@@ -14371,13 +14419,20 @@ window.addEventListener("DOMContentLoaded", () => {
       if(kind==="draw") r=await callServer("card_draw",{username:s.username});
       else if(kind==="buy") r=await callServer("card_buy_draw",{username:s.username});
       else if(kind==="drop") r=await callServer("card_discard",{username:s.username,card:cid});
-      else r=await callServer("card_use",{username:s.username,className:s.currentClassName,card:cid,target:target||null});
+      else if(cid==="an_dau") r=await callServer("card_use_trace",{username:s.username});
+      else {
+        st.traceExpires=await fetchTrace(s.username); // làm mới trạng thái ẩn dấu (phòng khi bật từ thiết bị khác)
+        var _args={username:s.username,className:s.currentClassName,card:cid,target:target||null};
+        r=await callServer("card_use2",_args);
+        // dự phòng khi HTML lên trước SQL: thẻ cũ quay về card_use như trước
+        if(r&&r.ok===false&&r.error==="network"&&cid!=="phong_an") r=await callServer("card_use",_args);
+      }
       if(!r||!r.ok){ msg=ERR[r&&r.error]||("Lỗi: "+(r&&r.error||"không rõ")); }
       else if(kind==="draw"||kind==="buy"){
         msg="Bạn bốc được: "+CARDS[r.card].icon+" "+CARDS[r.card].name+"!"+(kind==="buy"?" (-1000 🎋)":"");
         if(kind==="buy") await refreshMine();
       } else if(kind==="drop"){ msg="Đã bỏ thẻ "+CARDS[cid].name+"."; sel=-1; }
-      else { msg=report(r); announce(r,cid); picking=false; sel=-1; await refreshMine(); }
+      else { msg=report(r); announce(r,cid); picking=false; sel=-1; await refreshMine(); await refreshSeals(); }
     }catch(e){ msg="Có lỗi, thử lại sau."; }
     busy=false; load();
   }
@@ -14387,12 +14442,26 @@ window.addEventListener("DOMContentLoaded", () => {
     if(a==="pick"){ var i=parseInt(b.getAttribute("data-i"),10); sel=(sel===i)?-1:i; picking=false; draw(); }
     else if(a==="draw") act("draw");
     else if(a==="buy"){ if(confirm("Dùng 1000 Cành Trúc để bốc thêm 1 thẻ?")) act("buy"); }
+    else if(a==="use"&&SEAL_BLOCK[bag[sel]]&&isSealed(ctx()&&ctx().username)){ msg=ERR.sealed; draw(); }
     else if(a==="use"){ if(bag[sel]==="thien_thach"||MATE[bag[sel]]){ picking=true; draw(); } else if(bag[sel]==="doi_van"){ if(confirm("Đổi vận sẽ bỏ hết thẻ còn lại trong túi và bốc lại ngẫu nhiên. Tiếp tục?")) act("use"); } else act("use"); }
     else if(a==="steal"){ var mt=$("tb-mate"); if(mt&&mt.value) act("use",mt.value); else { msg=ERR.missing_target; draw(); } }
     else if(a==="hit") act("use",b.getAttribute("data-u"));
     else if(a==="drop"){ if(CARDS[bag[sel]]&&confirm("Bỏ thẻ "+CARDS[bag[sel]].name+"? Không thể lấy lại.")) act("drop"); }
     else if(a==="cancel"){ picking=false; draw(); }
   });
+  /* Ghi chú "🔒 Bị phong ấn" trên Bảng Xếp Hạng: bọc thêm vào hook renderDebtTagHtml_ có sẵn (mọi chế độ BXH đều gọi hook này) */
+  var _prevTag=window.renderDebtTagHtml_;
+  window.renderDebtTagHtml_=function(p){
+    var h=""; try{ if(typeof _prevTag==="function") h=_prevTag.apply(this,arguments)||""; }catch(e){}
+    try{
+      var u=p&&(p.username||(p.name===state.studentName?state.username:null)), t=sealExp(u);
+      if(t) h+=' <span class="tb-seal-tag" title="Đang bị phong ấn: không dùng được thẻ công kích và không bật được thẻ phòng thủ mới. Đây là cơ hội để tấn công!">🔒 Bị phong ấn · còn '+sealLeft(t)+'</span>';
+    }catch(e){}
+    return h;
+  };
+  setInterval(function(){ try{ if(ctx()&&(lbActive()||($("view-thebai")&&$("view-thebai").classList.contains("active")))) refreshSeals(); }catch(e){} },20000);
+  var lbBtn=document.querySelector('nav.tabs button[data-view="leaderboard"]');
+  if(lbBtn) lbBtn.addEventListener("click",function(){ refreshSeals(); });
   var nb=document.querySelector('nav.tabs button[data-view="thebai"]');
   if(nb) nb.addEventListener("click",function(){ msg=""; picking=false; sel=-1; load(); });
 })();
