@@ -1218,6 +1218,17 @@
   .tl-unified-row.is-customized{ border-color:var(--jade); }
   .tl-unified-row-all{ border:2px dashed var(--seal-dark); background:rgba(0,0,0,0.02); margin-bottom:4px; }
   .tl-unified-row-all.is-customized{ border-style:solid; }
+  /* Khối gập "Tùy Chỉnh Riêng Theo Từng Bài": mặc định thu gọn, bấm tiêu đề mới mở. */
+  .tl-fold{ border:2px solid var(--paper-darker); border-radius:14px; background:var(--paper); overflow:hidden; }
+  .tl-fold-summary{ display:flex; align-items:center; gap:8px; min-height:44px; padding:0 14px; cursor:pointer; list-style:none; user-select:none; font-weight:800; color:var(--seal-dark); font-size:14px; -webkit-tap-highlight-color:transparent; }
+  .tl-fold-summary::-webkit-details-marker{ display:none; }
+  .tl-fold-summary::before{ content:"\25B8"; display:inline-block; font-size:14px; transition:transform .2s var(--ease); }
+  .tl-fold[open] > .tl-fold-summary::before{ transform:rotate(90deg); }
+  .tl-fold[open] > .tl-fold-summary{ border-bottom:2px solid var(--paper-darker); }
+  .tl-fold-hint{ margin-left:auto; font-size:11px; font-weight:600; color:var(--ink-soft); white-space:nowrap; }
+  .tl-fold-hint::after{ content:"B\1EA5m \0111\1EC3  m\1EDF"; }
+  .tl-fold[open] .tl-fold-hint::after{ content:"B\1EA5m \0111\1EC3  thu g\1ECDn"; }
+  .tl-fold-body{ padding:14px; }
   .tl-customized-badge{ display:inline-block; font-size:10px; font-weight:800; color:#fff; background:var(--jade); border-radius:999px; padding:2px 8px; margin-left:6px; vertical-align:middle; }
   .tl-group-title{ font-size:10.5px; font-weight:800; color:var(--seal-dark); text-transform:uppercase; letter-spacing:.02em; margin:10px 0 6px; }
   .tl-group-title:first-of-type{ margin-top:0; }
@@ -1239,6 +1250,17 @@
     main{ padding:0 12px; }
     .gamification-header-bar{ padding:12px 14px; justify-content:center; text-align:center; }
     .gh-item{ justify-content:center; }
+  }
+
+  /* 01/10: TẮT "tia sáng trắng" chạy ngang qua từng dòng Bảng Xếp Hạng.
+     Chỉ ẩn lớp ::after dùng để vẽ vệt sáng (badgeSparkleSweep) của DÒNG;
+     viền, nền, glow, lửa 🔥, huy hiệu và mọi chức năng khác giữ nguyên.
+     Muốn bật lại: xóa đúng khối này. */
+  .lb-rank-1::after, .lb-rank-2::after, .lb-rank-3::after,
+  .lb-lvl-aura-3::after, .lb-lvl-aura-8::after,
+  .lb-row-transformed::after, .lb-row-legendary-transformed::after,
+  .lb-row-pending-reincarnation::after{
+    content:none !important; display:none !important; animation:none !important;
   }
 </style>
 <!-- ==================================================================
@@ -2449,13 +2471,16 @@
           <button class="btn btn-primary" id="tl-save-all-defaults-btn" style="margin-top:12px; font-size:12px; padding:8px 14px;">Lưu Tất Cả Mức Mặc Định</button>
         </div>
 
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
-          <input type="text" id="tl-unified-search" placeholder="🔍 Tìm bài / list theo tên..." style="flex:1; min-width:160px;">
-          <span id="tl-unified-count" style="font-size:12px; color:var(--ink-soft); white-space:nowrap;"></span>
-        </div>
-
-        <h5 style="margin:0 0 8px; color:var(--seal-dark);">Tùy Chỉnh Riêng Theo Từng Bài:</h5>
-        <div id="tl-unified-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <details id="tl-unified-fold" class="tl-fold">
+          <summary class="tl-fold-summary">Tùy Chỉnh Riêng Theo Từng Bài:<span class="tl-fold-hint"></span></summary>
+          <div class="tl-fold-body">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+              <input type="text" id="tl-unified-search" placeholder="🔍 Tìm bài / list theo tên..." style="flex:1; min-width:160px;">
+              <span id="tl-unified-count" style="font-size:12px; color:var(--ink-soft); white-space:nowrap;"></span>
+            </div>
+            <div id="tl-unified-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+          </div>
+        </details>
       </div>
 
       <!-- REWARD MATRIX CMS -->
@@ -2655,7 +2680,11 @@ const SUPABASE_ACTIONS_ = {
   award_badge: { fn: "award_badge", params: { username: "p_username", badgeId: "p_badge_id", xp: "p_xp", charm: "p_charm", badgeTitle: "p_badge_title", badgeIcon: "p_badge_icon" } },
   transfer_decoration: { fn: "transfer_decoration", params: { senderUsername: "p_sender_username", recipientUsername: "p_recipient_username", itemId: "p_item_id" } },
   get_shared_config: { fn: "get_shared_config", params: {} },
-  save_shared_config: { fn: "save_shared_config", params: { config: "p_config" } }
+  save_shared_config: { fn: "save_shared_config", params: { config: "p_config" } },
+  /* 01/10: cướp Trúc đi qua 1 RPC duy nhất có xác thực mật khẩu + hạn mức 5/ngày phía server */
+  steal_bamboo: { fn: "steal_bamboo_p", params: { username: "p_username", password: "p_password", className: "p_class", target: "p_target" } },
+  /* 01/10 (giảm egress): "dấu vân tay" nhẹ của tiến trình/roster/cấu hình — xem fetchSyncStamps_() */
+  get_sync_stamps: { fn: "get_sync_stamps", params: { username: "p_username", className: "p_class_name" } }
 };
 
 async function callSupabaseRpc_(action, data) {
@@ -3806,6 +3835,82 @@ function saveState() {
    THỬ LẠI 1 LẦN trước khi báo lỗi cho người dùng — hầu hết các trục trặc
    do nghẽn tải tạm thời (nhiều thiết bị cùng gọi lên script) sẽ tự khỏi
    ngay ở lần thử thứ 2. */
+/* =========================================================
+   ĐO DUNG LƯỢNG TẢI VỀ (egress) THEO TỪNG RPC — 01/10
+   ---------------------------------------------------------
+   Mở app, dùng bình thường ~5 phút, bấm F12 > Console, gõ:
+       egressReport()
+   để xem RPC nào nặng nhất (đã sắp theo tổng dung lượng giảm dần).
+   egressReset() để đo lại từ đầu. Số liệu là ƯỚC LƯỢNG (độ dài JSON
+   nhận về, chưa tính nén/header) nên dùng để SO SÁNH giữa các RPC.
+   Hàm này chỉ ghi số đếm trong bộ nhớ, không gửi gì đi đâu.
+   ========================================================= */
+let _egressStats_ = { startedAt: Date.now(), byAction: {} };
+function _egressRecord_(action, result) {
+  try {
+    const s = JSON.stringify(result);
+    const bytes = s ? s.length : 0;
+    const a = _egressStats_.byAction[action] || (_egressStats_.byAction[action] = { calls: 0, bytes: 0, max: 0 });
+    a.calls++;
+    a.bytes += bytes;
+    if (bytes > a.max) a.max = bytes;
+  } catch (e) { /* đo lỗi thì bỏ qua, tuyệt đối không ảnh hưởng luồng chính */ }
+}
+window.egressReport = function () {
+  const mins = Math.max((Date.now() - _egressStats_.startedAt) / 60000, 0.01);
+  const acts = Object.keys(_egressStats_.byAction);
+  const total = acts.reduce((t, k) => t + _egressStats_.byAction[k].bytes, 0) || 1;
+  const rows = acts.map(k => {
+    const a = _egressStats_.byAction[k];
+    return {
+      "RPC": k,
+      "Số lần gọi": a.calls,
+      "Tổng (KB)": +(a.bytes / 1024).toFixed(1),
+      "TB/lần (KB)": +(a.bytes / a.calls / 1024).toFixed(2),
+      "Lớn nhất (KB)": +(a.max / 1024).toFixed(1),
+      "KB/phút": +(a.bytes / 1024 / mins).toFixed(2),
+      "% tổng": +(a.bytes / total * 100).toFixed(1)
+    };
+  }).sort((x, y) => y["Tổng (KB)"] - x["Tổng (KB)"]);
+  console.table(rows);
+  console.log("Đã đo " + mins.toFixed(1) + " phút | tổng ≈ " + (total / 1024).toFixed(1) + " KB | ≈ " + (total / 1048576 / mins * 60).toFixed(2) + " MB/giờ cho máy này");
+  return rows;
+};
+window.egressReset = function () { _egressStats_ = { startedAt: Date.now(), byAction: {} }; };
+
+/* Xem TRONG cấu hình dùng chung (get_shared_config) cái gì nặng nhất.
+   Gõ configSizeReport() trong Console (sau khi đăng nhập). Chỉ đọc, không đổi gì. */
+window.configSizeReport = function () {
+  const out = [];
+  const add = (name, v) => {
+    let n = 0;
+    try { n = (JSON.stringify(v) || "").length; } catch (e) {}
+    out.push({ "Mục": name, "Dung lượng (KB)": +(n / 1024).toFixed(1) });
+  };
+  try {
+    const cfg = captureSharedConfig();
+    SHARED_FIELDS.forEach(f => add(f, cfg[f]));
+    const cls = cfg.classes;
+    if (cls && typeof cls === "object") {
+      Object.keys(cls).forEach(cn => {
+        const c = cls[cn];
+        if (c && typeof c === "object") {
+          Object.keys(c).forEach(k => {
+            add("classes › " + cn + " › " + k + (Array.isArray(c[k]) ? " [" + c[k].length + " mục]" : ""), c[k]);
+            /* đi sâu thêm 1 tầng cho classTest (mục nặng nhất) */
+            if (k === "classTest" && c[k] && typeof c[k] === "object") {
+              Object.keys(c[k]).forEach(k2 => add("   classTest › " + cn + " › " + k2 + (Array.isArray(c[k][k2]) ? " [" + c[k][k2].length + " mục]" : ""), c[k][k2]));
+            }
+          });
+        }
+      });
+    }
+  } catch (e) { console.warn("configSizeReport lỗi:", e); }
+  out.sort((a, b) => b["Dung lượng (KB)"] - a["Dung lượng (KB)"]);
+  console.table(out.slice(0, 30));
+  return out;
+};
+
 async function callServerOnce_(action, data) {
   const r = await fetch(ANSWER_SHEET_ENDPOINT, {
     method: "POST",
@@ -3833,7 +3938,7 @@ function callServer(action, data = {}, _isRetry = false) {
     ? () => callSupabaseRpc_(action, data)
     : () => callServerOnce_(action, data);
 
-  return runner().catch(err => {
+  return runner().then(res => { _egressRecord_(action, res); return res; }).catch(err => {
     if (!_isRetry) {
       console.warn("callServer(" + action + ") thất bại, đang tự thử lại lần 2...", err);
       return new Promise(resolve => setTimeout(resolve, 800))
@@ -4333,6 +4438,35 @@ function mergeClassTestForClass_(localCT, remoteCT) {
   return { lists, active, submissions, deletedListIds };
 }
 
+/* FIX (bài Video Chép Chính Tả đã xóa tự "hồi sinh"): trước đây field
+   "videos" của lớp được đồng bộ theo kiểu "bản server thắng". Nếu giáo
+   viên vừa xóa 1 bài (đã đẩy lên server) nhưng có 1 thiết bị khác còn giữ
+   bản cũ (vd: học sinh đang làm bài, nộp bài -> đẩy NGUYÊN "classes" cũ
+   lên server), bài vừa xóa sẽ quay lại cho mọi người. Giờ mỗi lần xóa ghi
+   thêm 1 tombstone class.deletedVideoIds = { idBài: thờiĐiểmXóa }, và khi
+   đồng bộ thì GỘP danh sách video của 2 bên theo id (bên server đứng
+   trước, bài chỉ có ở máy này được giữ lại), rồi loại mọi id có tombstone.
+   id video là "v_" + Date.now() nên không bao giờ bị dùng lại -> tombstone
+   luôn an toàn, thêm lại cùng link vẫn ra bài mới bình thường. */
+function mergeClassVideos_(localClass, remoteClass) {
+  const lc = (localClass && typeof localClass === "object") ? localClass : {};
+  const rc = (remoteClass && typeof remoteClass === "object") ? remoteClass : {};
+  const tomb = mergeWordTombstones_(lc.deletedVideoIds, rc.deletedVideoIds);
+  const seen = new Set();
+  const videos = [];
+  const take = v => {
+    if (!v || typeof v !== "object") return;
+    if (v.id) {
+      if (seen.has(v.id) || tomb[v.id]) return;
+      seen.add(v.id);
+    }
+    videos.push(v);
+  };
+  (Array.isArray(rc.videos) ? rc.videos : []).forEach(take);
+  (Array.isArray(lc.videos) ? lc.videos : []).forEach(take);
+  return { videos, deletedVideoIds: tomb };
+}
+
 /* Hợp nhất field "classes": GIỮ NGUYÊN cách đồng bộ cũ (ghi đè theo bản
    remote) cho mọi thứ TRỪ classTest — chỉ classTest được merge theo từng
    mục như mô tả ở trên. Lớp nào chỉ tồn tại cục bộ (vừa tạo, chưa kịp lên
@@ -4348,6 +4482,9 @@ function mergeSharedClasses_(localClasses, remoteClasses) {
     const mergedClass = Object.assign({}, rC);
     if (lC && typeof lC === "object") {
       mergedClass.classTest = mergeClassTestForClass_(lC.classTest, rC.classTest);
+      const vMerged = mergeClassVideos_(lC, rC);
+      mergedClass.videos = vMerged.videos;
+      if (Object.keys(vMerged.deletedVideoIds).length > 0) mergedClass.deletedVideoIds = vMerged.deletedVideoIds;
     }
     merged[cName] = mergedClass;
   });
@@ -4433,7 +4570,13 @@ function pushSharedConfigNow() {
    thiết bị khác từng lưu) -> nạp đè lên state hiện tại để mọi thiết
    bị đồng nhất. Nếu server chưa có gì -> đẩy cấu hình hiện tại lên
    làm bản gốc dùng chung. */
-async function syncSharedConfigFromServer() {
+async function syncSharedConfigFromServer(knownStamp) {
+  /* 01/10: lấy dấu vân tay cấu hình TRƯỚC khi tải bản đầy đủ (nếu nơi gọi
+     chưa có), để lượt poll đầu tiên không tải lại bản vừa tải xong. Dấu
+     vân tay lấy trước nên chỉ có thể dư 1 lượt tải, không thể bỏ sót. */
+  if (knownStamp === undefined && !_sharedConfigPushPending) {
+    try { const st0 = await fetchSyncStamps_(); knownStamp = st0 && st0.config ? st0.config : null; } catch (e) { knownStamp = null; }
+  }
   /* Đang có thay đổi cục bộ (xóa/sửa lớp, đổi màu...) chưa kịp đẩy xong lên
      server -> bỏ qua lượt kéo dữ liệu này, tránh ghi đè mất thay đổi vừa
      làm bằng bản cũ hơn đang còn trên server (xem comment ở
@@ -4471,6 +4614,8 @@ async function syncSharedConfigFromServer() {
        từ pollLiveUpdates(). */
     applyCustomTheme();
     saveState();
+    if (knownStamp) _syncStamps_.config = knownStamp;
+    return true; // 01/10: báo cho pollLiveUpdates biết đã áp dụng bản cấu hình thật từ server
   } else {
     _lastSharedConfigJson = null;
     pushSharedConfigToServer();
@@ -4638,6 +4783,7 @@ function stopLiveSync() {
     _liveSyncTimer = null;
   }
   _liveSyncTickCount = 0;
+  _resetSyncStamps_(); // 01/10: đăng xuất/khởi động lại poll -> bỏ dấu vân tay cũ
 }
 
 /* =========================================================
@@ -4761,22 +4907,106 @@ function startVersionCheckWatcher() {
   });
 }
 
+/* =========================================================
+   POLL THEO "DẤU VÂN TAY" (giảm egress — 01/10)
+   ---------------------------------------------------------
+   Trước đây mỗi 60s mỗi học sinh tải lại TOÀN BỘ danh sách lớp
+   (get_class_members) + toàn bộ tiến trình (get_progress), dù dữ liệu
+   không đổi. Giờ mỗi lượt poll chỉ gọi 1 hàm rất nhẹ get_sync_stamps
+   (vài chục byte) trả về md5 của 3 nguồn; nguồn nào dấu vân tay GIỐNG
+   lần trước thì bỏ qua, KHÁC thì tải bản đầy đủ y như cũ.
+
+   An toàn:
+   - Chỉ GHI NHỚ dấu vân tay sau khi tải + áp dụng bản đầy đủ THÀNH CÔNG;
+     dấu vân tay luôn được lấy TRƯỚC khi tải nên dữ liệu tải về luôn mới
+     bằng hoặc hơn dấu vân tay -> chỉ có thể dư 1 lượt tải, không thể bỏ
+     sót thay đổi.
+   - Hàm get_sync_stamps lỗi / chưa có trên Supabase / dấu vân tay null ->
+     quay về ĐÚNG cách poll cũ (tải đầy đủ), tạm ngưng thử 5 phút.
+   - Cứ mỗi FORCE_FULL_SYNC_EVERY_N_TICKS_ lượt (10 phút) vẫn ép tải đầy
+     đủ 1 lần như lưới an toàn, phòng khi máy lệch dữ liệu vì lý do lạ.
+   - Đổi tài khoản/đổi lớp -> dấu vân tay cũ không còn khớp khoá -> tải lại.
+   ========================================================= */
+const FORCE_FULL_SYNC_EVERY_N_TICKS_ = 10;
+const SYNC_STAMPS_BACKOFF_MS_ = 5 * 60 * 1000;
+let _syncStamps_ = { progress: null, progressKey: null, roster: null, rosterKey: null, config: null };
+let _syncStampsBackoffUntil_ = 0;
+
+function _resetSyncStamps_() {
+  /* Giữ nguyên dấu vân tay cấu hình: cấu hình dùng chung cho mọi tài khoản và
+     đã nằm sẵn trong state, đăng nhập lại không cần tải lại bản ~MB đó. */
+  _syncStamps_ = { progress: null, progressKey: null, roster: null, rosterKey: null, config: _syncStamps_.config };
+}
+
+async function fetchSyncStamps_() {
+  if (Date.now() < _syncStampsBackoffUntil_) return null;
+  try {
+    const res = await callSupabaseRpc_("get_sync_stamps", {
+      username: state.username,
+      className: state.currentClassName || null
+    });
+    _egressRecord_("get_sync_stamps", res);
+    if (res && res.ok === true) return res;
+  } catch (e) { /* hàm chưa được tạo trên Supabase, hoặc lỗi mạng -> dùng cách poll cũ */ }
+  _syncStampsBackoffUntil_ = Date.now() + SYNC_STAMPS_BACKOFF_MS_;
+  return null;
+}
+
 async function pollLiveUpdates() {
   if (document.hidden || !state.username) return;
 
-  /* FIX (giảm egress — 12/09): get_shared_config (nặng nhất vì chứa
-     customWords/videos/grammarSections) chỉ gọi mỗi
-     SHARED_CONFIG_SLOW_POLL_EVERY_N_TICKS lượt, TRỪ KHI đang ở 1 màn
-     hình thực sự cần dữ liệu này mới nhất ngay (xem
-     sharedConfigNeedsFastPoll_()) — khi đó vẫn gọi mỗi lượt như cũ để
-     không ảnh hưởng tính năng. */
   _liveSyncTickCount++;
-  const shouldSyncSharedConfigNow =
-    sharedConfigNeedsFastPoll_() ||
-    (_liveSyncTickCount % SHARED_CONFIG_SLOW_POLL_EVERY_N_TICKS === 0);
+  const tick = _liveSyncTickCount;
+  const uKey = String(state.username).toLowerCase();
+  const cKey = state.currentClassName || "";
 
-  const tasks = [refreshServerRoster(), pollOwnProgressFromServer()];
-  if (shouldSyncSharedConfigNow) tasks.push(syncSharedConfigFromServer());
+  const stamps = await fetchSyncStamps_();
+  /* Trong lúc chờ có thể đã đăng xuất / đổi tài khoản -> bỏ lượt này */
+  if (!state.username || String(state.username).toLowerCase() !== uKey) return;
+
+  const forceFull = tick % FORCE_FULL_SYNC_EVERY_N_TICKS_ === 0;
+  const st = _syncStamps_;
+  const unchanged = (fresh, saved, savedKey, key) =>
+    !!(stamps && fresh && !forceFull && saved === fresh && savedKey === key);
+
+  const tasks = [];
+
+  /* 1) Danh sách lớp */
+  if (!unchanged(stamps && stamps.roster, st.roster, st.rosterKey, cKey)) {
+    tasks.push((async () => {
+      const before = _rosterLastFetch;
+      await refreshServerRoster();
+      if (stamps && stamps.roster && _rosterLastFetch !== before && (state.currentClassName || "") === cKey) {
+        _syncStamps_.roster = stamps.roster;
+        _syncStamps_.rosterKey = cKey;
+      }
+    })());
+  }
+
+  /* 2) Tiến trình của chính mình */
+  if (!unchanged(stamps && stamps.progress, st.progress, st.progressKey, uKey)) {
+    tasks.push((async () => {
+      const applied = await pollOwnProgressFromServer();
+      if (applied && stamps && stamps.progress && String(state.username || "").toLowerCase() === uKey) {
+        _syncStamps_.progress = stamps.progress;
+        _syncStamps_.progressKey = uKey;
+      }
+    })());
+  }
+
+  /* 3) Cấu hình dùng chung (phần nặng nhất: từ vựng/video/ngữ pháp).
+        Có dấu vân tay -> chỉ tải khi đổi. Không có -> luật cũ (màn hình cần
+        dữ liệu mới ngay thì mỗi lượt, còn lại mỗi N lượt). */
+  const configStampKnown = !!(stamps && stamps.config);
+  const needConfig = configStampKnown
+    ? (forceFull || st.config !== stamps.config)
+    : (sharedConfigNeedsFastPoll_() || (tick % SHARED_CONFIG_SLOW_POLL_EVERY_N_TICKS === 0));
+  if (needConfig) {
+    tasks.push((async () => {
+      await syncSharedConfigFromServer(configStampKnown ? stamps.config : null);
+    })());
+  }
+
   await Promise.all(tasks);
   syncOwnDisplayNameFromRoster();
 
@@ -4819,6 +5049,7 @@ async function pollOwnProgressFromServer() {
     state.studentProgress[state.username] = captureCurrentProgress();
     captureServerBaseline_(); // FIX: chốt lại baseline Trúc/đạo cụ ngay sau khi poll bản mới nhất từ server
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    return true; // 01/10: báo cho pollLiveUpdates biết đã áp dụng bản tiến trình thật từ server
   }
 }
 
@@ -8696,20 +8927,16 @@ function renderStealModal() {
   });
 }
 
+/* 01/10: cướp Trúc nay đi qua RPC steal_bamboo (steal_bamboo_p trên Supabase): server tự kiểm tra mật khẩu,
+   cùng lớp, hạn mức 5 Trúc/ngày (lưu trên server, không phụ thuộc máy) và số Trúc THẬT của nạn nhân, rồi trừ/cộng
+   trong 1 giao dịch. Client không còn gọi grant_bamboo để cướp nữa. */
+let _stealBusy_ = false;
 async function stealBambooFromPeer(peerUsername) {
+  if (_stealBusy_) return;
   checkResetDailySteals();
   const g = state.gamification;
-  const stolenToday = g.dailySteals?.count || 0;
-  const quotaRem = Math.max(0, 5 - stolenToday);
 
-  if (quotaRem <= 0) {
-    return alert("Hôm nay bạn đã cướp đủ giới hạn 5 Cành Trúc rồi! Hãy quay lại vào ngày mai nhé 🐾");
-  }
-
-  /* FIX: tìm nạn nhân bằng username (khoá duy nhất) thay vì name — trước
-     đây dùng displayName để tìm, nếu 2 học viên trong lớp trùng tên hiển
-     thị thì find() có thể trả về NHẦM người (luôn lấy người đầu tiên
-     trùng tên trong mảng), khiến cướp nhầm bạn khác với người vừa bấm. */
+  /* FIX: tìm nạn nhân bằng username (khoá duy nhất) thay vì name — tránh nhầm giữa các học viên trùng tên hiển thị. */
   const peer = (g.peers || []).find(p => p.username === peerUsername);
   if (!peer) return alert("Không tìm thấy học viên này!");
 
@@ -8721,52 +8948,56 @@ async function stealBambooFromPeer(peerUsername) {
     return alert(`Túi Trúc của ${peer.name} đang trống (0 Cành Trúc), không thể cướp! 🐼`);
   }
 
-  /* FIX: mỗi lần bấm chỉ cướp đúng 1 Cành Trúc (trước đây random 1-2),
-     và tối đa 5 Cành Trúc/ngày (tức tối đa 5 lần bấm thành công/ngày). */
-  const stolenAmt = Math.min(1, quotaRem, peer.bambooPouch);
-
-  /* FIX QUAN TRỌNG: trước đây chỉ trừ trúc trên bản sao cục bộ (g.peers)
-     trong máy của người cướp — không hề ghi lên server, nên người bị
-     cướp KHÔNG thực sự mất trúc (lần đồng bộ roster kế tiếp sẽ kéo lại
-     đúng số trúc cũ từ server, coi như "cướp hụt"). Giờ gọi thẳng RPC
-     grant_bamboo với amount ÂM để trừ đúng vào bản ghi THẬT của người bị
-     cướp trên server — giống cách giáo viên cộng/trừ trúc cho học viên. */
-  const reason = `Bị ${state.studentName || "một bạn học"} cướp trúc 🐾`;
-  const res = await callServer("grant_bamboo", { username: peer.username, amount: -stolenAmt, reason });
+  _stealBusy_ = true;
+  let res;
+  try {
+    const accs = getLocalAccounts();
+    const accKey = String(state.username || "").toLowerCase();
+    const acc = accs[accKey] || accs[state.username] || null;
+    res = await callServer("steal_bamboo", {
+      username: state.username,
+      password: (acc && acc.password) || null,
+      className: state.currentClassName,
+      target: peer.username
+    });
+  } finally {
+    _stealBusy_ = false;
+  }
 
   if (!res || !res.ok) {
+    const code = res && res.error;
+    if (code === "steal_quota") {
+      if (!g.dailySteals) g.dailySteals = { date: new Date().toISOString().split("T")[0], count: 0 };
+      g.dailySteals.count = Math.max(g.dailySteals.count || 0, typeof res.used === "number" ? res.used : 5);
+      renderStealModal();
+      return alert("Hôm nay bạn đã cướp đủ giới hạn 5 Cành Trúc rồi! Hãy quay lại vào ngày mai nhé 🐾");
+    }
+    if (code === "target_empty") {
+      peer.bambooPouch = 0;
+      renderStealModal();
+      renderLeaderboardContent();
+      return alert(`Túi Trúc của ${peer.name} đang trống (0 Cành Trúc), không thể cướp! 🐼`);
+    }
+    if (code === "bad_auth") return alert("❌ Phiên đăng nhập không hợp lệ, hãy đăng xuất rồi đăng nhập lại.");
+    if (code === "not_in_class" || code === "target_not_in_class") return alert("❌ Bạn và bạn học này không cùng một lớp.");
+    if (code === "teacher_not_allowed" || code === "target_is_teacher") return alert("❌ Không thể cướp Trúc với tài khoản giáo viên.");
     return alert("❌ Cướp trúc thất bại, không kết nối được máy chủ:\n" + describeServerError(res));
   }
 
+  const stolenAmt = typeof res.amount === "number" ? res.amount : 1;
+
   /* Cập nhật lại bản sao cục bộ theo đúng số dư server vừa xác nhận */
-  peer.bambooPouch = (typeof res.bambooPouch === "number") ? res.bambooPouch : Math.max(0, peer.bambooPouch - stolenAmt);
+  peer.bambooPouch = (typeof res.targetPouch === "number") ? res.targetPouch : Math.max(0, peer.bambooPouch - stolenAmt);
 
-  /* FIX QUAN TRỌNG #2: trước đây phần Trúc "cướp được" chỉ được cộng vào
-     state cục bộ (g.bambooPouch += stolenAmt) rồi trông chờ saveState() ->
-     pushProgressToServer() (debounce 1.5 GIÂY) đẩy lên server sau. Nếu học
-     viên tắt tab/mất mạng ngay trong 1.5s đó, nạn nhân ĐÃ THẬT SỰ bị trừ
-     Trúc (vì RPC ở trên đã chạy xong và server xác nhận), nhưng người cướp
-     lại không nhận được gì khi mở lại app lần sau — Trúc "bốc hơi" khỏi hệ
-     thống. Giờ ghi nhận phần cộng cho người cướp CŨNG qua RPC grant_bamboo
-     ngay lập tức, đảm bảo chắc chắn giống hệt cách đã xử lý cho nạn nhân ở
-     trên, không còn phụ thuộc vào debounce nữa. */
-  const myReason = `Cướp được của ${peer.name} 🐾`;
-  const myRes = await callServer("grant_bamboo", { username: state.username, amount: stolenAmt, reason: myReason });
-
-  if (myRes && myRes.ok && typeof myRes.bambooPouch === "number") {
-    g.bambooPouch = myRes.bambooPouch;
-    captureServerBaseline_(); // FIX: chốt baseline ngay vì server vừa xác nhận số Trúc mới qua RPC trực tiếp, tránh save_progress kế tiếp tính lệch delta
-  } else {
-    /* Trường hợp hiếm: trừ của nạn nhân đã thành công nhưng cộng cho
-       chính mình lại gặp lỗi mạng ngay lúc đó -> vẫn cập nhật tạm trên
-       máy để không mất Trúc hiển thị trước mắt cho học viên, và
-       saveState() bên dưới sẽ cố đẩy lại qua kênh tiến trình thông
-       thường (save_progress) ở lượt lưu kế tiếp. */
-    g.bambooPouch += stolenAmt;
-    console.warn("Cộng Trúc cho người cướp qua RPC thất bại, dùng phương án dự phòng (state cục bộ + saveState debounce).", myRes);
+  /* Server đã cộng Trúc cho người cướp trong cùng giao dịch -> nạp đúng số dư đó và chốt baseline ngay,
+     để save_progress kế tiếp không tính lệch delta (giống cách làm cũ với grant_bamboo). */
+  if (typeof res.bambooPouch === "number") {
+    g.bambooPouch = res.bambooPouch;
+    captureServerBaseline_();
   }
 
-  g.dailySteals.count += stolenAmt;
+  if (!g.dailySteals) g.dailySteals = { date: new Date().toISOString().split("T")[0], count: 0 };
+  g.dailySteals.count = (typeof res.used === "number") ? res.used : (g.dailySteals.count || 0) + stolenAmt;
 
   const msg = `🐾 Gấu Trúc của ${state.studentName} đã cướp thành công ${stolenAmt} Cành Trúc của ${peer.name}! 🎋`;
   addStealFeedLog(msg);
@@ -9663,6 +9894,55 @@ const tmArea = document.getElementById("tm-area");
 let tmQueue = [], tmIdx = 0, tmTimerId = null, tmAttempts = 1;
 let tmMode = "full";          // "full" | "split"
 let tmSessionWords = [];      // toàn bộ pool của phiên hiện tại (full list hoặc phần đã tách)
+
+/* ===== TỈ THÍ BEGIN (tùy chọn): 2 bạn nhập cùng "mã tỉ thí", ai vượt bài và báo lên máy chủ TRƯỚC thì thắng.
+   Không nhập mã = làm bình thường, KHÔNG gọi gì thêm lên máy chủ. Chỉ người vượt bài mới gọi 1 lần (duel_finish);
+   nút "Xem kết quả" gọi 1 lần (duel_result). Không hỏi máy chủ liên tục, không ghi Bảng Tin. ===== */
+let tmDuelCode = "";
+function tmNormDuelCode_(s) { return String(s || "").trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "").slice(0, 20); }
+function tmDuelPw_(u) {
+  try { const a = getLocalAccounts(), k = String(u || "").toLowerCase(), x = a[k] || a[u]; return (x && x.password) || null; } catch (e) { return null; }
+}
+try {
+  SUPABASE_ACTIONS_.duel_finish = { fn: "duel_finish_p", params: { username: "p_username", password: "p_password", className: "p_class", code: "p_code", topic: "p_topic" } };
+  SUPABASE_ACTIONS_.duel_result = { fn: "duel_result_p", params: { username: "p_username", password: "p_password", className: "p_class", code: "p_code" } };
+} catch (e) {}
+function tmDuelText_(r, code, kind) {
+  if (!r || !r.ok) {
+    const e = r && r.error;
+    if (e === "bad_code") return "⚠️ Mã tỉ thí không hợp lệ (chỉ dùng chữ và số, tối đa 20 ký tự).";
+    if (e === "teacher_not_allowed") return "⚠️ Tài khoản giáo viên không tham gia tỉ thí.";
+    if (e === "bad_auth") return "⚠️ Phiên đăng nhập không hợp lệ, hãy đăng xuất rồi đăng nhập lại.";
+    return "⚠️ Chưa gửi/đọc được kết quả tỉ thí (mạng yếu, hoặc máy chủ chưa cập nhật). Thử lại nhé!";
+  }
+  const c = escapeHtml(code);
+  if (kind === "result") {
+    if (!r.found) return "⏳ Trận " + c + ": chưa có ai vượt bài.";
+    return r.isMe ? "🏆 Trận " + c + ": BẠN đã thắng!" : "🏁 Trận " + c + ": " + escapeHtml(r.winnerName || "một bạn") + " đã vượt bài trước.";
+  }
+  return r.won ? "🏆 BẠN THẮNG! Bạn là người vượt bài đầu tiên trong trận " + c + "!"
+               : "😮 Rất tiếc! " + escapeHtml(r.winnerName || "một bạn") + " đã vượt bài trước bạn trong trận " + c + ".";
+}
+async function tmDuelAfterPass_(topicName) {
+  const code = tmDuelCode; tmDuelCode = "";
+  if (!code) return;
+  try {
+    if (!tmArea) return;
+    tmArea.insertAdjacentHTML("beforeend", '<div id="tm-duel-box" style="margin-top:14px; padding:14px; text-align:center; font-weight:700; background:var(--accent-light); border-radius:14px;"></div>');
+    const run = async () => {
+      const box = document.getElementById("tm-duel-box");
+      if (!box) return;
+      box.textContent = "⏳ Đang xác định người thắng trận " + code + "...";
+      const r = await callServer("duel_finish", { username: state.username, password: tmDuelPw_(state.username), className: state.currentClassName, code: code, topic: topicName || "" });
+      const box2 = document.getElementById("tm-duel-box");
+      if (!box2) return;
+      box2.innerHTML = tmDuelText_(r, code, "finish") + ((!r || !r.ok) && !(r && (r.error === "bad_code" || r.error === "teacher_not_allowed")) ? ' <button type="button" class="btn btn-outline" id="tm-duel-retry" style="padding:4px 10px; font-size:12px;">Thử lại</button>' : "");
+      document.getElementById("tm-duel-retry")?.addEventListener("click", run);
+    };
+    await run();
+  } catch (e) { console.error("Lỗi tỉ thí:", e); }
+}
+/* ===== TỈ THÍ END ===== */
 let tmFullListCount = 0;      // tổng số từ có trong list/chủ đề đang chọn (dùng để báo cáo Zalo)
 
 function initTimedHandlers() {
@@ -9749,6 +10029,15 @@ function renderTimedIdle() {
         `}
       </div>
 
+      <div style="max-width:360px; margin:14px auto 0; text-align:left; padding:10px 14px; background:var(--accent-light); border-radius:14px;">
+        <label for="tm-duel-code" style="font-size:12px; font-weight:700;">⚔️ Mã tỉ thí (chỉ nhập khi thầy/cô tổ chức, để trống nếu làm bình thường):</label>
+        <div style="display:flex; gap:8px; margin-top:6px; flex-wrap:wrap;">
+          <input type="text" id="tm-duel-code" maxlength="20" placeholder="vd: TT01" autocomplete="off" style="flex:1; min-width:110px; text-transform:uppercase;">
+          <button type="button" class="btn btn-outline" id="tm-duel-check-btn" style="padding:6px 12px; font-size:12px;">🏁 Xem kết quả</button>
+        </div>
+        <div id="tm-duel-status" style="font-size:12px; margin-top:6px; font-weight:700;"></div>
+      </div>
+
       <button class="btn btn-primary" id="tm-start-btn" style="margin-top:16px;">Bắt đầu Thử Thách 🎋</button>
     </div>
   `;
@@ -9760,7 +10049,19 @@ function renderTimedIdle() {
     });
   });
 
+  document.getElementById("tm-duel-check-btn")?.addEventListener("click", async () => {
+    const code = tmNormDuelCode_(document.getElementById("tm-duel-code")?.value);
+    const stEl = document.getElementById("tm-duel-status");
+    if (!stEl) return;
+    if (!code) { stEl.textContent = "Hãy nhập mã tỉ thí trước."; return; }
+    stEl.textContent = "⏳ Đang kiểm tra...";
+    const r = await callServer("duel_result", { username: state.username, password: tmDuelPw_(state.username), className: state.currentClassName, code: code });
+    const stEl2 = document.getElementById("tm-duel-status");
+    if (stEl2) stEl2.innerHTML = tmDuelText_(r, code, "result");
+  });
+
   document.getElementById("tm-start-btn")?.addEventListener("click", () => {
+    tmDuelCode = tmNormDuelCode_(document.getElementById("tm-duel-code")?.value);
     const chosenMode = tmArea.querySelector('input[name="tm-mode-radio"]:checked')?.value || "full";
     tmFullListCount = words.length;
     if (chosenMode === "split" && canSplit) {
@@ -9914,6 +10215,8 @@ function renderTimedPass() {
       : `Full List — đủ ${tmFullListCount} từ`;
     sendResultToZalo(`⚡ Thử Thách Thời Gian${modeLabel}\nHọc viên: ${state.studentName}\nLớp: ${state.currentClassName}\nChủ đề/List: ${listName}\nChế độ: ${tmModeLine}\nHoàn thành sau: ${tmAttempts} lượt thử\nTrúc nhận được: +${rewardAmt} 🎋${getZaloRankNoteLine() ? "\n" + getZaloRankNoteLine() : ""}`);
   });
+
+  tmDuelAfterPass_(listName); // tỉ thí (chỉ chạy khi có nhập mã); lỗi được bắt bên trong, không ảnh hưởng phần trên
 }
 
 /* =========================================================
@@ -13492,6 +13795,17 @@ function renderTeacherVideoManagerList() {
     `;
     wrap.appendChild(row);
 
+    /* Hiện link (rút gọn) dưới tên bài để giáo viên nhận ra bài nào bị
+       thêm nhầm link — dùng textContent nên không chèn HTML từ URL. */
+    const titleBox = row.firstElementChild;
+    if (titleBox && v.url) {
+      const urlLine = document.createElement("div");
+      urlLine.textContent = v.url;
+      urlLine.title = v.url;
+      urlLine.style.cssText = "font-size:10px; color:var(--ink-soft); margin-top:2px; max-width:420px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;";
+      titleBox.appendChild(urlLine);
+    }
+
     const rowSel = row.querySelector(".vid-support-topic-sel");
     fillTopicSelect(rowSel, false);
     const rowNoneOpt = document.createElement("option");
@@ -13518,8 +13832,21 @@ function renderTeacherVideoManagerList() {
   wrap.querySelectorAll(".del-vid-btn").forEach(b => {
     b.onclick = () => {
       const cData = getCurrentClassData();
-      cData.videos = cData.videos.filter(x => x.id !== b.dataset.id);
+      const vid = (cData.videos || []).find(x => x.id === b.dataset.id);
+      if (!vid) return;
+      if (!confirm(`Xóa bài tập "${vid.title}"?\n\nHọc sinh sẽ không còn thấy bài này nữa và không thể hoàn tác. Các bài chép chính tả học sinh đã nộp trước đó vẫn được giữ nguyên.`)) return;
+
+      cData.videos = cData.videos.filter(x => x.id !== vid.id);
+      /* Tombstone để các thiết bị còn giữ bản cũ không làm bài này "hồi
+         sinh" khi đồng bộ (xem mergeClassVideos_). */
+      if (!cData.deletedVideoIds || typeof cData.deletedVideoIds !== "object") cData.deletedVideoIds = {};
+      cData.deletedVideoIds[vid.id] = Date.now();
       saveState();
+      /* Đẩy NGAY lên server và chờ xác nhận (giống lúc thêm video) thay vì
+         chỉ chờ debounce 1.5s — nếu đóng tab sớm thì lần xóa không bị mất. */
+      pushSharedConfigNow().catch(() => {
+        alert("⚠️ Đã xóa trên máy này nhưng chưa đồng bộ được lên server (có thể do mất mạng). Hãy giữ tab mở và kiểm tra kết nối; nếu bài hiện lại, bấm Xóa lần nữa.");
+      });
       renderTeacherVideoManagerList();
       initDictationView();
     };
@@ -14199,9 +14526,9 @@ window.addEventListener("DOMContentLoaded", () => {
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   var CARDS = {
     thien_thach:{k:"atk",icon:"☄️",name:"Thiên Thạch Diệt Thế",type:"⚔️ Công kích",desc:"Chọn 1 bạn ngẫu nhiên trong Top 5 XP: bạn ấy mất 5% XP, bạn nhận một nửa số XP đó, phần còn lại biến mất."},
-    ket_gioi:{k:"def",icon:"🛡️",name:"Kết Giới Hộ Thân",type:"🛡️ Kháng",desc:"Chặn 1 đòn công kích trong 24h."},
-    suoi_nguon:{k:"def",icon:"💧",name:"Suối Nguồn Sinh Mệnh",type:"🛡️ Kháng",desc:"Bật trong 24h (mỗi lúc chỉ có 1 thẻ phòng thủ). Đòn công kích đầu tiên nhắm vào bạn (Thiên Thạch, Thần Thâu, Kiếp Phú): bạn không mất XP/Trúc nào (được hoàn đủ), nhưng người tung vẫn nhận một nửa số lẽ ra lấy được. Không có tác dụng với Bàn Tay Vàng."},
-    guong:{k:"cnt",icon:"🪞",name:"Gương Thần Phản Chiếu",type:"🔄 Phản công",desc:"Bật trong 24h (mỗi lúc chỉ có 1 thẻ phòng thủ). Đòn công kích đầu tiên nhắm vào bạn (Thiên Thạch, Thần Thâu, Kiếp Phú) bị bật ngược: bạn không mất gì, người tung mất đúng số XP/Trúc lẽ ra bạn mất (tối đa bằng số họ đang có) và không ai nhận số đó. Không phản được Bàn Tay Vàng."},
+    ket_gioi:{k:"def",icon:"🛡️",name:"Kết Giới Hộ Thân",type:"🛡️ Kháng",desc:"Chặn 1 đòn công kích trong 24h. Khi bật thẻ này, bảng thông báo chỉ hiện “Có người vừa kích hoạt một thẻ bảo vệ...” (không ghi tên bạn, không nói là thẻ gì), nên không ai biết bạn đang có thẻ phòng thủ."},
+    suoi_nguon:{k:"def",icon:"💧",name:"Suối Nguồn Sinh Mệnh",type:"🛡️ Kháng",desc:"Bật trong 24h (mỗi lúc chỉ có 1 thẻ phòng thủ). Đòn công kích đầu tiên nhắm vào bạn (Thiên Thạch, Thần Thâu, Kiếp Phú): bạn không mất XP/Trúc nào (được hoàn đủ), nhưng người tung vẫn nhận một nửa số lẽ ra lấy được. Không có tác dụng với Bàn Tay Vàng. Khi bật thẻ này, bảng thông báo chỉ hiện “Có người vừa kích hoạt một thẻ bảo vệ...” (không ghi tên bạn, không nói là thẻ gì), nên không ai biết bạn đang có thẻ phòng thủ."},
+    guong:{k:"cnt",icon:"🪞",name:"Gương Thần Phản Chiếu",type:"🔄 Phản công",desc:"Bật trong 24h (mỗi lúc chỉ có 1 thẻ phòng thủ). Đòn công kích đầu tiên nhắm vào bạn (Thiên Thạch, Thần Thâu, Kiếp Phú) bị bật ngược: bạn không mất gì, người tung mất đúng số XP/Trúc lẽ ra bạn mất (tối đa bằng số họ đang có) và không ai nhận số đó. Không phản được Bàn Tay Vàng. Khi bật thẻ này, bảng thông báo chỉ hiện “Có người vừa kích hoạt một thẻ bảo vệ...” (không ghi tên bạn, không nói là thẻ gì), nên không ai biết bạn đang có thẻ phòng thủ."},
     phuc_lanh:{k:"spc",icon:"🍀",name:"Phúc Lành Giáng Xuống",type:"🎲 Đặc biệt",desc:"Nhận 10% số Trúc bằng tổng số Trúc của 3 bạn ngẫu nhiên trong Top 5 bạn có nhiều Trúc nhất lớp (trừ bạn), các bạn đó không bị trừ."},
     mua_xuan:{k:"spc",icon:"🌧️",name:"Mưa Xuân Cành Trúc",type:"🎲 Đặc biệt",desc:"Nhận ngẫu nhiên 5–30% số Trúc đang có của mình (tối thiểu 50, tối đa 5000)."},
     kiep_phu:{k:"atk",icon:"🏴‍☠️",name:"Kiếp Phú Cành Trúc",type:"⚔️ Công kích",desc:"Hệ thống chọn ngẫu nhiên 1 trong 4 bạn có nhiều Trúc nhất lớp (trừ bạn và người đang ẩn thân), cướp ngẫu nhiên 5–20% Trúc của bạn ấy về túi mình. Kết Giới chặn, Gương bật ngược, Suối Nguồn hoàn lại (bạn chỉ nhận một nửa)."},
@@ -14211,10 +14538,12 @@ window.addEventListener("DOMContentLoaded", () => {
     doi_van:{k:"spc",icon:"🔮",name:"Đổi Vận Bài",type:"🎲 Đặc biệt",desc:"Dùng thẻ này xong, TẤT CẢ thẻ còn lại trong túi sẽ bị bỏ đi và đổi bằng thẻ mới bốc ngẫu nhiên, số thẻ trong túi vẫn giữ nguyên. Ví dụ: còn 3 thẻ khác thì bỏ 3 thẻ đó và nhận 3 thẻ mới. Thẻ mới có thể tốt hơn, tệ hơn, hoặc trùng thẻ cũ, không chọn được. Cần có ít nhất 1 thẻ khác trong túi. Không tốn lượt bốc hay Trúc."},
     than_thau:{k:"atk",icon:"🥷",name:"Thần Thâu Cành Trúc",type:"⚔️ Công kích",desc:"Chọn 1 bạn bất kỳ trong lớp: bạn ấy mất 10-20% Trúc (tối đa 1000), bạn nhận một nửa số đó, phần còn lại biến mất. Kết Giới chặn, Gương bật ngược, Suối Nguồn hoàn lại."},
     phong_an:{k:"atk",icon:"🔒",name:"Phong Ấn Thẻ",type:"⚔️ Công kích",desc:"Chọn 1 bạn cùng lớp: trong 12h bạn ấy không dùng được thẻ công kích và không bật được thẻ phòng thủ mới (phòng thủ đã bật từ trước vẫn còn tác dụng). Bạn bị phong ấn sẽ hiện ghi chú trên Bảng Xếp Hạng. Kết Giới chặn được (bị tiêu), Ẩn Thân Phù làm bạn ấy không chọn được, Gương và Suối Nguồn không áp dụng."},
-    an_dau:{k:"spc",icon:"🕵️",name:"Ẩn Dấu Phù",type:"🎲 Đặc biệt",desc:"Trong 24h, bất kỳ thẻ nào bạn dùng cũng vẫn hiện ở Bảng Tin lớp nhưng dưới tên \"Người Ẩn Danh\", không ai biết là bạn. Không ảnh hưởng hiệu quả của thẻ."}
+    an_dau:{k:"spc",icon:"🕵️",name:"Ẩn Dấu Phù",type:"🎲 Đặc biệt",desc:"Trong 24h, bất kỳ thẻ nào bạn dùng cũng vẫn hiện ở Bảng Tin lớp nhưng dưới tên \"Người Ẩn Danh\", không ai biết là bạn. Không ảnh hưởng hiệu quả của thẻ."},
+    thien_ly_nhan:{k:"spc",icon:"👁️",name:"Thiên Lý Nhãn",type:"🎲 Đặc biệt",desc:"Chọn 1 bạn cùng lớp để nhìn trộm: biết bạn ấy hiện có đang bật thẻ phòng thủ (Kết Giới, Suối Nguồn, Gương Thần) hay không, nhưng không biết là loại nào. Chỉ mình bạn thấy kết quả, bảng thông báo không hiện gì. Không chọn được bạn đang Ẩn Thân."},
+    pha_gioi_chuy:{k:"atk",icon:"💥",name:"Phá Giới Chùy",type:"⚔️ Công kích",desc:"Chọn 1 bạn cùng lớp: nếu bạn ấy đang bật thẻ phòng thủ (Kết Giới, Suối Nguồn, Gương Thần) thì thẻ đó bị phá vỡ ngay, không ai mất XP/Trúc. Nếu bạn ấy không có phòng thủ thì cú đập trượt và thẻ vẫn bị tiêu, nên hãy đoán đúng người (dùng Thiên Lý Nhãn để dò trước). Bảng thông báo chỉ hiện bạn vung chùy lên ai, không nói trúng hay trượt. Không chọn được bạn đang Ẩn Thân. Đang bị Phong Ấn thì không dùng được."}
   };
   var ERR = {bad_auth:"Phiên đăng nhập không hợp lệ, hãy đăng xuất rồi đăng nhập lại.",unknown_card:"Thẻ này không tồn tại hoặc bản trang chưa cập nhật, hãy tải lại trang.",not_found:"Không tìm thấy tài khoản.",already_drawn:"Hôm nay bạn đã bốc thẻ miễn phí rồi.",no_card:"Không tìm thấy thẻ này trong túi.",ward_active:"Bạn đang có 1 thẻ phòng thủ còn hiệu lực.",
-    cannot_target_self:"Không thể tự đánh mình.",nothing_to_take:"Bạn đó chưa đủ XP/Trúc để lấy.",
+    not_in_class:"Bạn không thuộc lớp này, hãy chọn lại lớp rồi thử lại.",cannot_target_self:"Không thể tự đánh mình.",nothing_to_take:"Bạn đó chưa đủ XP/Trúc để lấy.",
     no_target:"Chưa có mục tiêu phù hợp (Top 5 XP đang ẩn thân hoặc chưa có ai), hoặc chưa có bạn nào có Trúc để nhận.",teacher_not_allowed:"Giáo viên không chơi thẻ bài.",network:"Không kết nối được máy chủ, thử lại sau.",
     free_draw_available:"Bạn vẫn còn lượt bốc miễn phí hôm nay.",max_draws:"Hôm nay bạn đã bốc tối đa 2 lần.",
     bag_full:"Túi đã đủ 4 thẻ. Hãy dùng hoặc bỏ 1 thẻ để bốc thêm.",not_enough_bamboo:"Không đủ 1000 Cành Trúc để bốc thêm.",
@@ -14236,7 +14565,9 @@ window.addEventListener("DOMContentLoaded", () => {
     than_thau:{note:"Chọn 1 bạn trong lớp để thâu Trúc:",btn:"🥷 Thâu!",cls:"btn-bad",atk:true},
     ban_tay_vang:{note:"Chọn 1 bạn để cướp ngẫu nhiên 1 thẻ:",btn:"🖐️ Cướp!",cls:"btn-bad",atk:true},
     phong_an:{note:"Chọn 1 bạn để phong ấn trong 12h:",btn:"🔒 Phong ấn!",cls:"btn-bad",atk:true},
-    dong_tam:{note:"Chọn 1 bạn để kết nghĩa (cả hai cùng +500 Trúc):",btn:"🤝 Kết nghĩa!",cls:"btn-ok",atk:false}
+    dong_tam:{note:"Chọn 1 bạn để kết nghĩa (cả hai cùng +500 Trúc):",btn:"🤝 Kết nghĩa!",cls:"btn-ok",atk:false},
+    thien_ly_nhan:{note:"Chọn 1 bạn để nhìn trộm xem có đang bật thẻ phòng thủ không:",btn:"👁️ Nhìn trộm!",cls:"btn-ok",atk:true},
+    pha_gioi_chuy:{note:"Chọn 1 bạn để phá thẻ phòng thủ (trượt nếu bạn ấy không có phòng thủ):",btn:"💥 Phá!",cls:"btn-bad",atk:true}
   };
   var drawnId=null, st=null, sel=-1, picking=false, msg="", busy=false, newCard=-1;
   function getBag(){ return ((st&&st.bag)||[]).filter(function(x){return CARDS[x];}); }
@@ -14249,7 +14580,7 @@ window.addEventListener("DOMContentLoaded", () => {
     try{ var tr=await callServer("card_get_trace",{username:username,password:pw(username)}); return (tr&&tr.ok&&tr.traceExpires)||null; }catch(e){ return null; }
   }
   /* Phong Ấn Thẻ: danh sách bạn đang bị phong ấn trong lớp (hiện ghi chú trên Bảng Xếp Hạng) */
-  var seals=[], SEAL_BLOCK={thien_thach:1,than_thau:1,kiep_phu:1,ban_tay_vang:1,phong_an:1,ket_gioi:1,suoi_nguon:1,guong:1,an_than:1};
+  var seals=[], SEAL_BLOCK={thien_thach:1,than_thau:1,kiep_phu:1,ban_tay_vang:1,phong_an:1,ket_gioi:1,suoi_nguon:1,guong:1,an_than:1,pha_gioi_chuy:1};
   function sealExp(u){
     if(!u) return 0; u=String(u).toLowerCase();
     for(var i=0;i<seals.length;i++){
@@ -14334,6 +14665,8 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   function report(r){
     var t=r.target||"";
+    if(r.card==="thien_ly_nhan") return r.hasWard ? "👁️ "+t+" ĐANG bật 1 thẻ phòng thủ (không biết là loại nào). Kết quả chỉ đúng tại lúc này." : "👁️ "+t+" hiện KHÔNG bật thẻ phòng thủ nào. Kết quả chỉ đúng tại lúc này.";
+    if(r.card==="pha_gioi_chuy") return r.outcome==="broken" ? "💥 Trúng! Thẻ phòng thủ của "+t+" đã bị phá vỡ." : "💨 Trượt rồi: "+t+" không có thẻ phòng thủ nào đang bật.";
     if(r.card==="kiep_phu"){
       switch(r.outcome){
         case "hit": return "🏴‍☠️ Cướp của "+t+" "+r.loss+" Trúc ("+r.pct+"%): bạn nhận +"+r.gain+" Trúc.";
@@ -14361,7 +14694,7 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
     switch(r.outcome){
-      case "ward_set": return "Đã kích hoạt thẻ phòng thủ trong 24h.";
+      case "ward_set": return "Đã kích hoạt thẻ phòng thủ trong 24h. Thông báo chung chỉ hiện “Có người vừa kích hoạt một thẻ bảo vệ...”, không ai biết là bạn hay thẻ gì.";
       case "blessed": return "🍀 Nhận "+r.amount+" Trúc từ: "+r.names+".";
       case "hit": return "☄️ Trúng "+t+": họ mất "+r.loss+" XP, bạn nhận +"+r.gain+" XP.";
       case "blocked": return "🛡️ "+t+" có Kết Giới, đòn bị chặn đứng!";
@@ -14387,6 +14720,8 @@ window.addEventListener("DOMContentLoaded", () => {
         addActivityLog(txt); return;
       }
       if(cid==="phong_an"){ addActivityLog(r.outcome==="blocked" ? "🔒 "+me+" dùng Phong Ấn lên "+t+" nhưng bị Kết Giới Hộ Thân chặn đứng! 🛡️" : "🔒 "+me+" dùng thẻ Phong Ấn lên "+t+": 12h không dùng được thẻ công kích và không bật được phòng thủ mới!"); return; }
+      if(cid==="thien_ly_nhan") return; // nhìn trộm: không báo gì lên Bảng Tin
+      if(cid==="pha_gioi_chuy"){ addActivityLog("💥 "+me+" vừa vung Phá Giới Chùy lên "+t+"!"); return; } // không nói trúng hay trượt
       if(cid==="an_than"){ addActivityLog("🌫️ "+me+" vừa dùng thẻ Ẩn Thân Phù, 24h không ai chọn được!"); return; }
       if(cid==="dong_tam"){ addActivityLog("🤝 "+me+" dùng thẻ Đồng Tâm Kết Nghĩa với "+t+": cả hai cùng nhận +"+r.amount+" Cành Trúc!"); return; }
       if(cid==="doi_van"){ addActivityLog("🔮 "+me+" dùng thẻ Đổi Vận Bài, bốc lại cả túi bài!"); return; }
@@ -14406,7 +14741,7 @@ window.addEventListener("DOMContentLoaded", () => {
         addActivityLog(txt); return;
       }
       switch(r.outcome){
-        case "ward_set": txt=c.icon+" "+me+" vừa dùng thẻ "+c.name+"!"; break;
+        case "ward_set": txt="🛡️ Có người vừa kích hoạt một thẻ bảo vệ..."; break; /* ẩn tên người + loại thẻ (Kết Giới / Suối Nguồn / Gương Thần) để kẻ tấn công không đoán được */
         case "blessed": txt="🍀 "+me+" dùng thẻ Phúc Lành Giáng Xuống, nhận "+r.amount+" Cành Trúc từ "+esc(r.names)+"!"; break;
         case "hit": txt="☄️ "+me+" dùng thẻ Thiên Thạch Diệt Thế lên "+t+": "+t+" mất "+r.loss+" XP, "+me+" nhận +"+r.gain+" XP!"; break;
         case "blocked": txt="☄️ "+me+" dùng thẻ Thiên Thạch Diệt Thế lên "+t+" nhưng bị Kết Giới Hộ Thân chặn đứng! 🛡️"; break;
