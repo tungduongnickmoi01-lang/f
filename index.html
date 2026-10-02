@@ -2617,10 +2617,13 @@ const ANSWER_SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbzQYTWaCo
    bên dưới). Cơ chế này 100% TỰ ĐỘNG — KHÔNG cần Thầy nhớ đổi bất cứ
    giá trị nào mỗi lần push nữa (khác với bản cũ trước đây dùng
    APP_BUILD_ID phải tự tay đổi, rất dễ quên và làm mất tác dụng).
-   APP_BUILD_ID dưới đây giờ chỉ còn mang tính GHI CHÚ NGÀY THÁNG cho
-   Thầy dễ theo dõi, đổi hay không đổi đều không ảnh hưởng gì tới việc
-   tự phát hiện bản mới: */
-const APP_BUILD_ID = "20260815a";
+   [CẬP NHẬT 02/10] APP_BUILD_ID được dùng LẠI làm lớp kiểm tra thứ nhất:
+   MỖI LẦN DEPLOY hãy đổi giá trị bên dưới (vd: ngày + chữ cái, như
+   20261002b, 20261003a...). Máy học sinh so APP_BUILD_ID đang chạy với
+   APP_BUILD_ID trong file mới tải từ server; khác nhau -> tự tải lại,
+   KHÔNG phụ thuộc mốc hash lưu trong localStorage. Nếu lỡ quên đổi thì
+   cơ chế so hash toàn file bên dưới vẫn chạy như cũ làm lớp dự phòng: */
+const APP_BUILD_ID = "20261002a";
 
 /* ==== SUPABASE (Bước 2) ====
    Dán Project URL + anon key của bạn vào đây — lấy ở Supabase Dashboard
@@ -4830,9 +4833,27 @@ function isInExamLikeView_() {
 let _pendingReloadHash = null;
 let _pendingReloadNoticeShown = false;
 
+/* Kiểm tra theo APP_BUILD_ID (02/10): nhớ trong sessionStorage rằng tab này
+   vừa tải lại để lên đúng mã bản đó, nếu 5 phút sau vẫn lệch (CDN còn trả
+   bản cũ) thì KHÔNG tải lại tiếp -> tránh vòng lặp reload vô tận. */
+let _pendingBuildId_ = null;
+const BUILD_RELOAD_TRY_KEY_ = "zhVocabApp_buildReloadTry_v1";
+function _buildReloadAlreadyTried_(id) {
+  try {
+    const raw = sessionStorage.getItem(BUILD_RELOAD_TRY_KEY_);
+    if (!raw) return false;
+    const o = JSON.parse(raw);
+    return !!(o && o.id === id && Date.now() - o.ts < 5 * 60 * 1000);
+  } catch (e) { return false; }
+}
+function _markBuildReloadTried_(id) {
+  try { sessionStorage.setItem(BUILD_RELOAD_TRY_KEY_, JSON.stringify({ id: id, ts: Date.now() })); } catch (e) {}
+}
+
 function applyPendingReload_() {
   if (!_pendingReloadHash || _newVersionReloadTriggered) return;
   _newVersionReloadTriggered = true;
+  if (_pendingBuildId_) _markBuildReloadTried_(_pendingBuildId_);
   try { localStorage.setItem(LAST_KNOWN_PAGE_HASH_KEY, _pendingReloadHash); } catch (e) {}
   showToast("🔄 Đang cập nhật lên phiên bản mới nhất...", "success");
   setTimeout(() => {
@@ -4863,6 +4884,24 @@ async function checkForNewVersion() {
     if (!res.ok) return;
     const html = await res.text();
     const freshHash = await hashPageText_(html);
+
+    /* Lớp 1 (02/10): so APP_BUILD_ID trong file trên server với bản đang chạy.
+       Khác nhau = máy này đang chạy code cũ -> tải lại, bất kể mốc hash. */
+    const bm = html.match(/const\s+APP_BUILD_ID\s*=\s*["']([^"']+)["']/);
+    const serverBuildId = bm ? bm[1] : null;
+    if (serverBuildId && serverBuildId !== APP_BUILD_ID && !_buildReloadAlreadyTried_(serverBuildId)) {
+      _pendingReloadHash = freshHash;
+      _pendingBuildId_ = serverBuildId;
+      if (isInExamLikeView_()) {
+        if (!_pendingReloadNoticeShown) {
+          _pendingReloadNoticeShown = true;
+          showToast("📌 Đã có bản cập nhật mới — sẽ tự áp dụng ngay sau khi bạn làm xong phần này nhé", "info");
+        }
+        return;
+      }
+      applyPendingReload_();
+      return;
+    }
 
     let lastKnownHash = null;
     try { lastKnownHash = localStorage.getItem(LAST_KNOWN_PAGE_HASH_KEY); } catch (e) {}
