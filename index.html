@@ -162,6 +162,17 @@
   .minigame-icon{ font-size:44px; }
   .minigame-name{ font-family:var(--serif); font-weight:800; color:var(--seal-dark); font-size:15px; }
   .minigame-desc{ font-size:12px; color:var(--ink-soft); font-weight:600; line-height:1.4; min-height:34px; }
+  /* Nâng cược (x1 / x2 / x5 / All-in) trong các trò chơi may rủi */
+  .bet-picker{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:0 0 12px; }
+  .bet-picker-title{ width:100%; font-size:12px; font-weight:800; color:var(--ink-soft); margin-bottom:2px; }
+  .bet-chip{ flex:1 1 70px; min-width:70px; border:2px solid var(--paper-darker); background:var(--paper); color:var(--seal-dark); border-radius:12px; padding:6px 4px; font-weight:800; font-size:13px; line-height:1.25; cursor:pointer; font-family:inherit; transition:all 0.15s var(--ease); }
+  .bet-chip small{ display:block; font-size:10px; font-weight:700; color:var(--ink-soft); }
+  .bet-chip:hover:not(:disabled){ border-color:var(--gold); transform:translateY(-1px); }
+  .bet-chip.active{ background:linear-gradient(90deg,#D4AF37,#F0C75E); border-color:#B8860B; color:#3A2E00; box-shadow:0 2px 0 #B8860B; }
+  .bet-chip.active small{ color:#5A4700; }
+  .bet-chip.allin.active{ background:linear-gradient(90deg,#E53935,#FF7043); border-color:#B71C1C; color:#fff; box-shadow:0 2px 0 #B71C1C; }
+  .bet-chip.allin.active small{ color:#FFF3E0; }
+  .bet-chip:disabled{ opacity:0.45; cursor:not-allowed; }
 
   /* Vòng Quay Lễ Hội — hiệu ứng quay đẹp hơn */
   .wheel-glow-ring{
@@ -1672,6 +1683,7 @@
       <span>🎒 Túi Trúc: <strong style="color:var(--seal-dark);" id="wheel-bamboo-balance">0 🎋</strong></span>
       <span>🎡 Lượt hôm nay: <strong style="color:var(--seal-dark);" id="wheel-spins-left">5/5</strong></span>
     </div>
+    <div class="bet-picker" id="wheel-bet-picker"></div>
     <div id="wheel-stage" style="position:relative; width:260px; height:260px; margin:0 auto 16px;">
       <div class="wheel-glow-ring"></div>
       <div id="wheel-pointer" style="position:absolute; top:-8px; left:50%; font-size:26px; z-index:5; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.3));">🔻</div>
@@ -1681,7 +1693,7 @@
     <div id="wheel-result-banner" style="display:none; font-weight:800; font-size:14px; margin-bottom:12px; padding:10px; border-radius:12px;"></div>
     <button class="btn btn-primary" id="spin-wheel-btn" style="width:100%; font-size:14px; padding:12px; border-radius:14px; background:linear-gradient(90deg,#D4AF37,#F0C75E); border-color:#B8860B; box-shadow:0 3px 0 #B8860B; color:#3A2E00;">🎡 Quay Ngay (10 🎋)</button>
     <div style="font-size:11px; color:var(--ink-soft); margin-top:10px; line-height:1.5;">
-      📌 Mỗi lượt quay tốn <strong>10 🎋 Cành Trúc</strong>, tối đa <strong>5 lượt/ngày</strong>. Vòng quay tự cân bằng: thua liên tiếp sẽ dễ gỡ hơn, thắng lớn liên tiếp sẽ tạm khó ăn to hơn — không ai lãi/lỗ quá đà nhé! 🎋
+      📌 Mỗi lượt quay tốn <strong>từ 10 🎋 Cành Trúc</strong> (có thể nâng cược x2 / x5 / All-in — thắng hay thua đều nhân lên), tối đa <strong>5 lượt/ngày</strong>. Vòng quay tự cân bằng: thua liên tiếp sẽ dễ gỡ hơn, thắng lớn liên tiếp sẽ tạm khó ăn to hơn — không ai lãi/lỗ quá đà nhé! 🎋
     </div>
   </div>
 </div>
@@ -1697,6 +1709,7 @@
       <span>🎒 Túi Trúc: <strong style="color:var(--seal-dark);" id="fishing-bamboo-balance">0 🎋</strong></span>
       <span>🎣 Lượt hôm nay: <strong style="color:var(--seal-dark);" id="fishing-casts-left">5/5</strong></span>
     </div>
+    <div class="bet-picker" id="fishing-bet-picker"></div>
     <div id="fishing-stage" style="position:relative;">
       <div id="fishing-pond">
         <div id="fishing-rod-line" style="height:40px;"></div>
@@ -1707,7 +1720,7 @@
     <div id="fishing-result-banner" style="display:none; font-weight:800; font-size:14px; margin-bottom:12px; padding:10px; border-radius:12px;"></div>
     <button class="btn btn-primary" id="cast-fishing-btn" style="width:100%; font-size:14px; padding:12px; border-radius:14px; background:linear-gradient(90deg,#4FA8C9,#2E7DA3); border-color:#1D5A7A; box-shadow:0 3px 0 #1D5A7A; color:#fff;">🎣 Thả Câu (10 🎋)</button>
     <div style="font-size:11px; color:var(--ink-soft); margin-top:10px; line-height:1.5;">
-      📌 Mỗi lượt thả câu tốn <strong>10 🎋 Cành Trúc</strong>, tối đa <strong>5 lượt/ngày</strong>. Mỗi lần thả câu ra một loài cá ngẫu nhiên, thử vận may của em nhé 🐟
+      📌 Mỗi lượt thả câu tốn <strong>từ 10 🎋 Cành Trúc</strong> (có thể nâng cược x2 / x5 / All-in — thắng hay thua đều nhân lên), tối đa <strong>5 lượt/ngày</strong>. Mỗi lần thả câu ra một loài cá ngẫu nhiên, thử vận may của em nhé 🐟
     </div>
   </div>
 </div>
@@ -1723,6 +1736,7 @@
       <span>🎒 Túi Trúc: <strong style="color:var(--seal-dark);" id="lantern-bamboo-balance">0 🎋</strong></span>
       <span>🏮 Lượt hôm nay: <strong style="color:var(--seal-dark);" id="lantern-releases-left">5/5</strong></span>
     </div>
+    <div class="bet-picker" id="lantern-bet-picker"></div>
     <div id="lantern-stage" style="position:relative;">
       <div id="lantern-sky">
         <div id="lantern-moon">🌙</div>
@@ -1733,7 +1747,7 @@
     <div id="lantern-result-banner" style="display:none; font-weight:800; font-size:14px; margin-bottom:12px; padding:10px; border-radius:12px;"></div>
     <button class="btn btn-primary" id="release-lantern-btn" style="width:100%; font-size:14px; padding:12px; border-radius:14px; background:linear-gradient(90deg,#E85D3D,#F0A85E); border-color:#B8501F; box-shadow:0 3px 0 #B8501F; color:#fff;">🏮 Thả Đèn (10 🎋)</button>
     <div style="font-size:11px; color:var(--ink-soft); margin-top:10px; line-height:1.5;">
-      📌 Mỗi lượt thả đèn tốn <strong>10 🎋 Cành Trúc</strong>, tối đa <strong>5 lượt/ngày</strong>. Mỗi lần thả đèn sẽ bay cao hay bay thấp ngẫu nhiên, cùng xem vận may nhé 🏮
+      📌 Mỗi lượt thả đèn tốn <strong>từ 10 🎋 Cành Trúc</strong> (có thể nâng cược x2 / x5 / All-in — thắng hay thua đều nhân lên), tối đa <strong>5 lượt/ngày</strong>. Mỗi lần thả đèn sẽ bay cao hay bay thấp ngẫu nhiên, cùng xem vận may nhé 🏮
     </div>
   </div>
 </div>
@@ -1749,6 +1763,7 @@
       <span>🎒 Túi Trúc: <strong style="color:var(--seal-dark);" id="kite-bamboo-balance">0 🎋</strong></span>
       <span>🪁 Lượt hôm nay: <strong style="color:var(--seal-dark);" id="kite-releases-left">5/5</strong></span>
     </div>
+    <div class="bet-picker" id="kite-bet-picker"></div>
     <div id="kite-stage" style="position:relative;">
       <div id="kite-sky">
         <div id="kite-sun">☀️</div>
@@ -1767,7 +1782,7 @@
     <div id="kite-result-banner" style="display:none; font-weight:800; font-size:14px; margin-bottom:12px; padding:10px; border-radius:12px;"></div>
     <button class="btn btn-primary" id="cast-kite-btn" style="width:100%; font-size:14px; padding:12px; border-radius:14px; background:linear-gradient(90deg,#42A5D9,#7EC8E3); border-color:#1B6F94; box-shadow:0 3px 0 #1B6F94; color:#fff;">🪁 Thả Diều (10 🎋)</button>
     <div style="font-size:11px; color:var(--ink-soft); margin-top:10px; line-height:1.5;" id="kite-footer-note">
-      📌 Mỗi lượt thả diều tốn <strong>10 🎋 Cành Trúc</strong>, tối đa <strong>5 lượt/ngày</strong>. Trả lời đúng 1 câu từ vựng trước khi thả — trả lời càng chắc, diều càng dễ bay cao 🪁
+      📌 Mỗi lượt thả diều tốn <strong>từ 10 🎋 Cành Trúc</strong> (có thể nâng cược x2 / x5 / All-in — thắng hay thua đều nhân lên), tối đa <strong>5 lượt/ngày</strong>. Trả lời đúng 1 câu từ vựng trước khi thả — trả lời càng chắc, diều càng dễ bay cao 🪁
     </div>
   </div>
 </div>
@@ -1783,6 +1798,7 @@
       <span>🎒 Túi Trúc: <strong style="color:var(--seal-dark);" id="fortune-bamboo-balance">0 🎋</strong></span>
       <span>☯️ Lượt hôm nay: <strong style="color:var(--seal-dark);" id="fortune-draws-left">5/5</strong></span>
     </div>
+    <div class="bet-picker" id="fortune-bet-picker"></div>
     <div id="fortune-stage" style="position:relative;">
       <div id="fortune-shrine">
         <div id="fortune-tube">🎋</div>
@@ -1792,7 +1808,7 @@
     <div id="fortune-result-banner" style="display:none; font-weight:800; font-size:14px; margin-bottom:12px; padding:10px; border-radius:12px;"></div>
     <button class="btn btn-primary" id="draw-fortune-btn" style="width:100%; font-size:14px; padding:12px; border-radius:14px; background:linear-gradient(90deg,#8E24AA,#BA68C8); border-color:#5C1B72; box-shadow:0 3px 0 #5C1B72; color:#fff;">☯️ Bốc Xăm (10 🎋)</button>
     <div style="font-size:11px; color:var(--ink-soft); margin-top:10px; line-height:1.5;">
-      📌 Mỗi lượt bốc xăm tốn <strong>10 🎋 Cành Trúc</strong>, tối đa <strong>5 lượt/ngày</strong>. Mỗi lượt bốc ra một quẻ xăm ngẫu nhiên, cùng xem vận may hôm nay của em ☯️
+      📌 Mỗi lượt bốc xăm tốn <strong>từ 10 🎋 Cành Trúc</strong> (có thể nâng cược x2 / x5 / All-in — thắng hay thua đều nhân lên), tối đa <strong>5 lượt/ngày</strong>. Mỗi lượt bốc ra một quẻ xăm ngẫu nhiên, cùng xem vận may hôm nay của em ☯️
     </div>
   </div>
 </div>
@@ -1808,6 +1824,7 @@
       <span>🎒 Túi Trúc: <strong style="color:var(--seal-dark);" id="pot-bamboo-balance">0 🎋</strong></span>
       <span>🏺 Lượt hôm nay: <strong style="color:var(--seal-dark);" id="pot-smashes-left">5/5</strong></span>
     </div>
+    <div class="bet-picker" id="pot-bet-picker"></div>
     <div id="pot-stage" style="position:relative;">
       <div id="pot-yard">
         <div id="pot-cluster"></div>
@@ -1815,7 +1832,7 @@
     </div>
     <div id="pot-result-banner" style="display:none; font-weight:800; font-size:14px; margin-bottom:12px; padding:10px; border-radius:12px;"></div>
     <div style="font-size:11px; color:var(--ink-soft); margin-top:2px; line-height:1.5;">
-      📌 Chọn 1 niêu để đập, mỗi lượt tốn <strong>10 🎋 Cành Trúc</strong>, tối đa <strong>5 lượt/ngày</strong>. Mỗi niêu chứa một phần thưởng bí mật, đập thử để biết bên trong có gì nhé 🏺
+      📌 Chọn 1 niêu để đập, mỗi lượt tốn <strong>từ 10 🎋 Cành Trúc</strong> (có thể nâng cược x2 / x5 / All-in — thắng hay thua đều nhân lên), tối đa <strong>5 lượt/ngày</strong>. Mỗi niêu chứa một phần thưởng bí mật, đập thử để biết bên trong có gì nhé 🏺
     </div>
   </div>
 </div>
@@ -2623,7 +2640,7 @@ const ANSWER_SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbzQYTWaCo
    APP_BUILD_ID trong file mới tải từ server; khác nhau -> tự tải lại,
    KHÔNG phụ thuộc mốc hash lưu trong localStorage. Nếu lỡ quên đổi thì
    cơ chế so hash toàn file bên dưới vẫn chạy như cũ làm lớp dự phòng: */
-const APP_BUILD_ID = "20261002a";
+const APP_BUILD_ID = "20261002b";
 
 /* ==== SUPABASE (Bước 2) ====
    Dán Project URL + anon key của bạn vào đây — lấy ở Supabase Dashboard
@@ -4086,9 +4103,30 @@ function captureServerBaseline_() {
    Tách riêng ra để 2 nhánh không lặp lại logic hoà giải baseline. */
 function doPushProgressNow_() {
   markSavePending();
+  /* FIX (02/10 — Trúc "báo lỗ 4 nhưng thực tế mất 24"): trước đây khi server
+     trả lời save_progress, code GHI ĐÈ thẳng bambooPouch/totalXp/badgeCharmBonus
+     cục bộ bằng số server trả về, dù trong lúc request còn đang bay học sinh
+     có thể vừa chơi thêm 1 ván (trừ cược) hoặc vừa nhận thưởng — các thay đổi
+     đó nằm ngoài request nên bị XOÁ khỏi ví, và lượt lưu kế tiếp lại coi như
+     "không có gì thay đổi" nên mất vĩnh viễn. Giờ chụp lại ĐÚNG giá trị đã gửi
+     đi, khi nhận phản hồi chỉ áp phần server hoà giải thêm và GIỮ NGUYÊN các
+     thay đổi cục bộ phát sinh sau lúc gửi. Khi không có thay đổi nào phát sinh
+     (trường hợp thường gặp) kết quả y hệt cách cũ. */
+  const _pushStartedAt_ = _progressSyncTimerSetAt;
+  const _sentUser_ = state.username;
+  const _progressToSend_ = captureCurrentProgress();
+  if (_progressToSend_.gamification && typeof _progressToSend_.gamification === "object") {
+    /* Bản sao nông: cố định các con số Trúc/XP/Mị Lực tại thời điểm gửi (kể cả khi
+       callServer tự thử lại lần 2 sau vài trăm ms), các đối tượng lồng bên trong giữ nguyên. */
+    _progressToSend_.gamification = Object.assign({}, _progressToSend_.gamification);
+  }
+  const _sg_ = _progressToSend_.gamification || {};
+  const _sentPouch_ = typeof _sg_.bambooPouch === "number" ? _sg_.bambooPouch : null;
+  const _sentXp_ = typeof _sg_.totalXp === "number" ? _sg_.totalXp : null;
+  const _sentCharm_ = typeof _sg_.badgeCharmBonus === "number" ? _sg_.badgeCharmBonus : null;
   return callServer("save_progress", {
     username: state.username,
-    progress: captureCurrentProgress(),
+    progress: _progressToSend_,
     baselinePouch: _serverBaselinePouch,
     baselineDecorations: _serverBaselineDecorations,
     baselineXp: _serverBaselineXp,
@@ -4099,11 +4137,14 @@ function doPushProgressNow_() {
        decorations, totalXp, badgeCharmBonus, unlockedBadges) -> đồng bộ
        lại state cục bộ + baseline theo đúng bản đó, để lần lưu kế tiếp
        tính delta đúng, không bị lệch dần. */
-    if (res && res.ok && state.gamification) {
-      if (typeof res.bambooPouch === "number") state.gamification.bambooPouch = res.bambooPouch;
+    if (res && res.ok && state.gamification && state.username === _sentUser_) {
+      /* Số server trả về + phần thay đổi cục bộ phát sinh SAU lúc gửi (nếu có). */
+      const _keepLocal_ = (serverVal, sentVal, localVal) =>
+        (typeof sentVal === "number" && typeof localVal === "number") ? (serverVal + (localVal - sentVal)) : serverVal;
+      if (typeof res.bambooPouch === "number") state.gamification.bambooPouch = _keepLocal_(res.bambooPouch, _sentPouch_, state.gamification.bambooPouch);
       if (Array.isArray(res.decorations)) state.gamification.decorations = res.decorations;
-      if (typeof res.totalXp === "number") state.gamification.totalXp = res.totalXp;
-      if (typeof res.badgeCharmBonus === "number") state.gamification.badgeCharmBonus = res.badgeCharmBonus;
+      if (typeof res.totalXp === "number") state.gamification.totalXp = _keepLocal_(res.totalXp, _sentXp_, state.gamification.totalXp);
+      if (typeof res.badgeCharmBonus === "number") state.gamification.badgeCharmBonus = _keepLocal_(res.badgeCharmBonus, _sentCharm_, state.gamification.badgeCharmBonus);
       if (Array.isArray(res.unlockedBadges)) state.gamification.unlockedBadges = res.unlockedBadges;
       /* FIX: server (save_progress) giờ tự hoà giải mọi bộ đếm trong
          gamification.counters (vd: timedPassCount = số lần vượt Thử
@@ -4117,10 +4158,21 @@ function doPushProgressNow_() {
         Object.assign(state.gamification.counters, res.counters);
       }
       captureServerBaseline_();
+      /* Baseline Trúc/XP/Mị Lực phải là số SERVER vừa chốt (không kèm phần thay đổi cục bộ
+         phát sinh sau lúc gửi), để lượt lưu kế tiếp tính đúng delta = đúng phần thay đổi đó. */
+      if (typeof res.bambooPouch === "number") _serverBaselinePouch = res.bambooPouch;
+      if (typeof res.totalXp === "number") _serverBaselineXp = res.totalXp;
+      if (typeof res.badgeCharmBonus === "number") _serverBaselineBadgeCharm = res.badgeCharmBonus;
     }
   }).finally(() => {
     /* Chỉ mở khoá poll SAU KHI request đã có kết quả (thành công hay
-       thất bại đều mở, để không khoá poll vĩnh viễn nếu mất mạng). */
+       thất bại đều mở, để không khoá poll vĩnh viễn nếu mất mạng).
+       FIX (02/10): nếu trong lúc request này còn bay mà đã có nơi khác BẬT LẠI cờ
+       (vd: học sinh vừa bấm chơi minigame — đã trừ cược nhưng chưa cộng thưởng/chưa lưu),
+       KHÔNG được mở khoá ở đây, vì poll get_progress sẽ ghi đè mất khoản trừ cược chưa lưu.
+       Lượt lưu của chính nơi đó sẽ tự mở khoá khi xong (và cờ tự hết hạn sau
+       SAVE_PENDING_TIMEOUT_MS nếu có sự cố). */
+    if (_progressSyncTimerSetAt !== null && _pushStartedAt_ !== null && _progressSyncTimerSetAt > _pushStartedAt_) return;
     clearSavePending();
   });
 }
@@ -6974,6 +7026,142 @@ async function buyTribulation() {
 }
 
 /* =========================================================
+   NÂNG CƯỢC cho 6 trò chơi may rủi: x1 / x2 / x5 / All-in
+   ---------------------------------------------------------
+   - Giá cược gốc của mỗi trò vẫn là hằng số *_COST (10 🎋). Mức cược
+     thực tế = giá gốc × hệ số (x1, x2, x5) hoặc toàn bộ Trúc đang có
+     (All-in, tối đa BET_ALLIN_CAP).
+   - Phần thưởng/lỗ tính theo đúng bảng tỉ lệ của từng trò (seg.mult)
+     nhưng nhân với mức cược => ăn nhiều hơn hoặc lỗ to hơn, kỳ vọng
+     (EV) của từng trò GIỮ NGUYÊN.
+   - Mức cược chỉ nằm trong bộ nhớ (không lưu vào state / Supabase) và
+     tự về x1 mỗi lần mở trò chơi. Mức cược của ván đang chạy được
+     "đóng băng" vào biến _xxxStake lúc trừ Trúc, nên đổi mức giữa
+     chừng hay Trúc thay đổi không làm sai tiền thưởng.
+   - netTotal (cân bằng động) được quy về "đơn vị cược gốc" qua
+     betNormNet() để các ngưỡng ±40 không bị lệch khi cược lớn.
+   ========================================================= */
+const BET_ALLIN_CAP = 2000; /* trần cho nút All-in (đổi số này nếu muốn nâng/hạ) */
+const BET_LEVELS = [
+  { id: "x1",    label: "x1",     mult: 1 },
+  { id: "x2",    label: "x2",     mult: 2 },
+  { id: "x5",    label: "x5",     mult: 5 },
+  { id: "allin", label: "All-in", mult: 0 }
+];
+const BET_GAMES = {
+  wheel:   { base: () => WHEEL_SPIN_COST, render: () => renderWheelModal() },
+  fishing: { base: () => FISH_CAST_COST,  render: () => renderFishingModal() },
+  lantern: { base: () => LANTERN_COST,    render: () => renderLanternModal() },
+  kite:    { base: () => KITE_COST,       render: () => renderKiteModal() },
+  fortune: { base: () => FORTUNE_COST,    render: () => renderFortuneModal() },
+  pot:     { base: () => POT_COST,        render: () => renderPotModal() }
+};
+const _betState = {};
+
+function _betEntry(gameId) {
+  if (!_betState[gameId]) _betState[gameId] = { level: "x1", locked: false };
+  return _betState[gameId];
+}
+
+function _betPouch() {
+  const g = state.gamification;
+  return Math.max(0, Math.floor((g && g.bambooPouch) || 0));
+}
+
+function _betStakeFor(levelId, base, pouch) {
+  if (levelId === "allin") {
+    return Math.max(base, Math.min(pouch, BET_ALLIN_CAP));
+  }
+  const lv = BET_LEVELS.find(l => l.id === levelId) || BET_LEVELS[0];
+  return base * lv.mult;
+}
+
+/* Mức cược sẽ dùng cho ván kế tiếp. Nếu mức đang chọn vượt quá số Trúc
+   hiện có thì tự hạ xuống mức cao nhất còn đủ; không đủ cả giá gốc thì
+   trả về giá gốc (để các thông báo "không đủ Trúc" cũ vẫn chạy đúng). */
+function getBetStake(gameId, base) {
+  const e = _betEntry(gameId);
+  const pouch = _betPouch();
+  if (pouch < base) return base;
+  let stake = _betStakeFor(e.level, base, pouch);
+  if (stake > pouch) {
+    for (const id of ["x5", "x2", "x1"]) {
+      const st = _betStakeFor(id, base, pouch);
+      if (st <= pouch) { e.level = id; stake = st; break; }
+    }
+  }
+  return stake;
+}
+
+function betReset(gameId) {
+  const e = _betEntry(gameId);
+  e.level = "x1";
+  e.locked = false;
+}
+
+function betSetLock(gameId, locked) {
+  _betEntry(gameId).locked = !!locked;
+  renderBetPicker(gameId);
+}
+
+function betNormNet(netChange, stake, base) {
+  return Math.round((netChange / Math.max(1, stake / base)) * 100) / 100;
+}
+
+function betLogTag(stake, base) {
+  return stake > base ? ` — cược ${stake} 🎋` : "";
+}
+
+function confirmBigBet(gameId, stake, base) {
+  const e = _betEntry(gameId);
+  if (e.level === "x1" || stake <= base) return true;
+  const pouch = _betPouch();
+  if (e.level !== "allin" && stake * 2 < pouch) return true;
+  const pct = pouch > 0 ? Math.round((stake / pouch) * 100) : 100;
+  const lvLabel = (BET_LEVELS.find(l => l.id === e.level) || BET_LEVELS[0]).label;
+  try {
+    return confirm(`🎲 Em sắp cược ${stake} 🎋 (${lvLabel}) — khoảng ${pct}% số Trúc đang có.\nThắng thì nhận nhiều hơn, nhưng thua cũng mất nhiều hơn.\nEm chắc chưa?`);
+  } catch (err) {
+    return true;
+  }
+}
+
+function renderBetPicker(gameId) {
+  const wrap = document.getElementById(gameId + "-bet-picker");
+  const meta = BET_GAMES[gameId];
+  if (!wrap || !meta) return;
+  const g = state.gamification;
+  if (!g) return;
+  const base = meta.base();
+  const e = _betEntry(gameId);
+  const pouch = _betPouch();
+  const current = getBetStake(gameId, base);
+  const canPlayAny = pouch >= base;
+
+  wrap.innerHTML = "";
+  const title = document.createElement("div");
+  title.className = "bet-picker-title";
+  title.innerHTML = `🎲 Mức cược ván này: <strong style="color:var(--seal-dark);">${current} 🎋</strong>`;
+  wrap.appendChild(title);
+
+  BET_LEVELS.forEach(lv => {
+    const stake = _betStakeFor(lv.id, base, pouch);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "bet-chip" + (lv.id === "allin" ? " allin" : "") + (e.level === lv.id ? " active" : "");
+    btn.innerHTML = `${lv.label}<small>${stake} 🎋</small>`;
+    const affordable = canPlayAny && (lv.id === "allin" ? true : stake <= pouch);
+    btn.disabled = e.locked || !affordable;
+    btn.addEventListener("click", () => {
+      if (e.locked) return;
+      e.level = lv.id;
+      meta.render();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+/* =========================================================
    VÒNG QUAY LỄ HỘI — TRÒ CHƠI MAY RỦI (dùng Trúc để cược)
    Nguyên tắc thiết kế:
    - Kỳ vọng (Expected Value) toàn bảng ≈ 99% số Trúc đặt cược,
@@ -7192,6 +7380,7 @@ function getActiveFishWeights(g) {
 }
 
 function openFishingModal() {
+  betReset("fishing");
   checkResetFishingDaily();
   const line = document.getElementById("fishing-rod-line");
   const bobber = document.getElementById("fishing-bobber");
@@ -7213,6 +7402,8 @@ function renderFishingModal() {
   checkResetFishingDaily();
   const g = state.gamification;
   if (!g) return;
+  const betNow = getBetStake("fishing", FISH_CAST_COST);
+  renderBetPicker("fishing");
   const balEl = document.getElementById("fishing-bamboo-balance");
   if (balEl) balEl.textContent = `${g.bambooPouch || 0} 🎋`;
   const leftEl = document.getElementById("fishing-casts-left");
@@ -7221,15 +7412,15 @@ function renderFishingModal() {
 
   const castBtn = document.getElementById("cast-fishing-btn");
   if (castBtn) {
-    const canCast = castsLeft > 0 && (g.bambooPouch || 0) >= FISH_CAST_COST;
+    const canCast = castsLeft > 0 && (g.bambooPouch || 0) >= betNow;
     castBtn.disabled = !canCast;
     castBtn.style.opacity = canCast ? "1" : "0.55";
     if (castsLeft <= 0) {
       castBtn.textContent = "🎣 Hết lượt câu hôm nay";
-    } else if ((g.bambooPouch || 0) < FISH_CAST_COST) {
+    } else if ((g.bambooPouch || 0) < betNow) {
       castBtn.textContent = "🎣 Không đủ Trúc để câu";
     } else {
-      castBtn.textContent = `🎣 Thả Câu (${FISH_CAST_COST} 🎋)`;
+      castBtn.textContent = `🎣 Thả Câu (${betNow} 🎋)`;
     }
   }
 }
@@ -7246,19 +7437,21 @@ function spawnPondRipple() {
 }
 
 let _fishingCasting = false;
+let _fishingStake = FISH_CAST_COST;
 
 function castFishingLine() {
   if (_fishingCasting) return;
   checkResetFishingDaily();
   const g = state.gamification;
   if (!g) return;
+  const betStake = getBetStake("fishing", FISH_CAST_COST);
 
   const castsLeft = Math.max(0, FISH_DAILY_LIMIT - (g.fishing.castsToday || 0));
   if (castsLeft <= 0) {
     return alert(`Bạn đã dùng hết ${FISH_DAILY_LIMIT} lượt câu hôm nay rồi! Hẹn câu tiếp vào ngày mai nhé 🎣`);
   }
-  if ((g.bambooPouch || 0) < FISH_CAST_COST) {
-    return alert(`Bạn không đủ Trúc để câu! Cần ${FISH_CAST_COST} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
+  if ((g.bambooPouch || 0) < betStake) {
+    return alert(`Bạn không đủ Trúc để câu! Cần ${betStake} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
   }
 
   const weights = getActiveFishWeights(g);
@@ -7266,7 +7459,10 @@ function castFishingLine() {
   const seg = FISH_SPECIES[targetIndex];
 
   /* Trừ Trúc cược ngay khi thả câu */
-  g.bambooPouch -= FISH_CAST_COST;
+  if (!confirmBigBet("fishing", betStake, FISH_CAST_COST)) return;
+  _fishingStake = betStake;
+  betSetLock("fishing", true);
+  g.bambooPouch -= betStake;
   g.fishing.castsToday = (g.fishing.castsToday || 0) + 1;
   trackMinigamePlayed("fishing");
   /* FIX (Trúc bị trừ đúng nhưng vài giây sau tự "hồi" lại số cũ): từ lúc
@@ -7320,10 +7516,10 @@ function resolveFishingCast(seg) {
   const g = state.gamification;
   if (!g) return;
 
-  const bambooBack = Math.round(FISH_CAST_COST * seg.mult);
+  const bambooBack = Math.round(_fishingStake * seg.mult);
   g.bambooPouch += bambooBack;
-  const netChange = bambooBack - FISH_CAST_COST;
-  g.fishing.netTotal = (g.fishing.netTotal || 0) + netChange;
+  const netChange = bambooBack - _fishingStake;
+  g.fishing.netTotal = (g.fishing.netTotal || 0) + betNormNet(netChange, _fishingStake, FISH_CAST_COST);
   g.fishing.recentResults.push(seg.mult);
   if (g.fishing.recentResults.length > 10) g.fishing.recentResults.shift();
 
@@ -7347,7 +7543,7 @@ function resolveFishingCast(seg) {
     banner.style.display = "block";
   }
 
-  addActivityLog(`🎣 Gấu Trúc của ${state.studentName} vừa câu được "${seg.label}" ${seg.icon} ở Câu Cá Trúc (nhận lại ${bambooBack} 🎋${extraText})!`);
+  addActivityLog(`🎣 Gấu Trúc của ${state.studentName} vừa câu được "${seg.label}" ${seg.icon} ở Câu Cá Trúc (nhận lại ${bambooBack} 🎋${extraText}${betLogTag(_fishingStake, FISH_CAST_COST)})!`);
 
   const stage = document.getElementById("fishing-stage");
   if (netChange < 0) {
@@ -7364,6 +7560,7 @@ function resolveFishingCast(seg) {
   }
 
   _fishingCasting = false;
+  betSetLock("fishing", false);
   saveState();
   updateGamificationUI();
   renderFishingModal();
@@ -7463,6 +7660,7 @@ function spawnLanternStars() {
 }
 
 function openLanternModal() {
+  betReset("lantern");
   checkResetLanternDaily();
   spawnLanternStars();
   const icon = document.getElementById("lantern-icon");
@@ -7483,6 +7681,8 @@ function renderLanternModal() {
   checkResetLanternDaily();
   const g = state.gamification;
   if (!g) return;
+  const betNow = getBetStake("lantern", LANTERN_COST);
+  renderBetPicker("lantern");
   const balEl = document.getElementById("lantern-bamboo-balance");
   if (balEl) balEl.textContent = `${g.bambooPouch || 0} 🎋`;
   const leftEl = document.getElementById("lantern-releases-left");
@@ -7491,33 +7691,35 @@ function renderLanternModal() {
 
   const releaseBtn = document.getElementById("release-lantern-btn");
   if (releaseBtn) {
-    const canRelease = releasesLeft > 0 && (g.bambooPouch || 0) >= LANTERN_COST;
+    const canRelease = releasesLeft > 0 && (g.bambooPouch || 0) >= betNow;
     releaseBtn.disabled = !canRelease;
     releaseBtn.style.opacity = canRelease ? "1" : "0.55";
     if (releasesLeft <= 0) {
       releaseBtn.textContent = "🏮 Hết lượt thả hôm nay";
-    } else if ((g.bambooPouch || 0) < LANTERN_COST) {
+    } else if ((g.bambooPouch || 0) < betNow) {
       releaseBtn.textContent = "🏮 Không đủ Trúc để thả";
     } else {
-      releaseBtn.textContent = `🏮 Thả Đèn (${LANTERN_COST} 🎋)`;
+      releaseBtn.textContent = `🏮 Thả Đèn (${betNow} 🎋)`;
     }
   }
 }
 
 let _lanternReleasing = false;
+let _lanternStake = LANTERN_COST;
 
 function releaseLantern() {
   if (_lanternReleasing) return;
   checkResetLanternDaily();
   const g = state.gamification;
   if (!g) return;
+  const betStake = getBetStake("lantern", LANTERN_COST);
 
   const releasesLeft = Math.max(0, LANTERN_DAILY_LIMIT - (g.lantern.releasesToday || 0));
   if (releasesLeft <= 0) {
     return alert(`Bạn đã dùng hết ${LANTERN_DAILY_LIMIT} lượt thả đèn hôm nay rồi! Hẹn thả tiếp vào ngày mai nhé 🏮`);
   }
-  if ((g.bambooPouch || 0) < LANTERN_COST) {
-    return alert(`Bạn không đủ Trúc để thả đèn! Cần ${LANTERN_COST} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
+  if ((g.bambooPouch || 0) < betStake) {
+    return alert(`Bạn không đủ Trúc để thả đèn! Cần ${betStake} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
   }
 
   const weights = getActiveLanternWeights(g);
@@ -7525,7 +7727,10 @@ function releaseLantern() {
   const seg = LANTERN_OUTCOMES[targetIndex];
 
   /* Trừ Trúc cược ngay khi thả đèn */
-  g.bambooPouch -= LANTERN_COST;
+  if (!confirmBigBet("lantern", betStake, LANTERN_COST)) return;
+  _lanternStake = betStake;
+  betSetLock("lantern", true);
+  g.bambooPouch -= betStake;
   g.lantern.releasesToday = (g.lantern.releasesToday || 0) + 1;
   trackMinigamePlayed("lantern");
   /* FIX (Trúc bị trừ đúng nhưng vài giây sau tự "hồi" lại số cũ) — xem
@@ -7571,10 +7776,10 @@ function resolveLanternRelease(seg) {
   const g = state.gamification;
   if (!g) return;
 
-  const bambooBack = Math.round(LANTERN_COST * seg.mult);
+  const bambooBack = Math.round(_lanternStake * seg.mult);
   g.bambooPouch += bambooBack;
-  const netChange = bambooBack - LANTERN_COST;
-  g.lantern.netTotal = (g.lantern.netTotal || 0) + netChange;
+  const netChange = bambooBack - _lanternStake;
+  g.lantern.netTotal = (g.lantern.netTotal || 0) + betNormNet(netChange, _lanternStake, LANTERN_COST);
   g.lantern.recentResults.push(seg.mult);
   if (g.lantern.recentResults.length > 10) g.lantern.recentResults.shift();
 
@@ -7598,7 +7803,7 @@ function resolveLanternRelease(seg) {
     banner.style.display = "block";
   }
 
-  addActivityLog(`🏮 Gấu Trúc của ${state.studentName} vừa thả Đèn Lồng Ước Nguyện, kết quả "${seg.label}" ${seg.icon} (nhận lại ${bambooBack} 🎋${extraText})!`);
+  addActivityLog(`🏮 Gấu Trúc của ${state.studentName} vừa thả Đèn Lồng Ước Nguyện, kết quả "${seg.label}" ${seg.icon} (nhận lại ${bambooBack} 🎋${extraText}${betLogTag(_lanternStake, LANTERN_COST)})!`);
 
   const stage = document.getElementById("lantern-stage");
   if (netChange < 0) {
@@ -7615,6 +7820,7 @@ function resolveLanternRelease(seg) {
   }
 
   _lanternReleasing = false;
+  betSetLock("lantern", false);
   saveState();
   updateGamificationUI();
   renderLanternModal();
@@ -7691,6 +7897,7 @@ function getActiveKiteWeights(g, isCorrect) {
 }
 
 function openKiteModal() {
+  betReset("kite");
   checkResetKiteDaily();
   const icon = document.getElementById("kite-icon");
   const reveal = document.getElementById("kite-reveal");
@@ -7712,6 +7919,8 @@ function renderKiteModal() {
   checkResetKiteDaily();
   const g = state.gamification;
   if (!g) return;
+  const betNow = getBetStake("kite", KITE_COST);
+  renderBetPicker("kite");
   const balEl = document.getElementById("kite-bamboo-balance");
   if (balEl) balEl.textContent = `${g.bambooPouch || 0} 🎋`;
   const leftEl = document.getElementById("kite-releases-left");
@@ -7722,21 +7931,22 @@ function renderKiteModal() {
   if (!castBtn) return;
   const words = allWords();
   const notEnoughWords = words.length < 4;
-  const canCast = releasesLeft > 0 && (g.bambooPouch || 0) >= KITE_COST && !notEnoughWords;
+  const canCast = releasesLeft > 0 && (g.bambooPouch || 0) >= betNow && !notEnoughWords;
   castBtn.disabled = !canCast;
   castBtn.style.opacity = canCast ? "1" : "0.55";
   if (notEnoughWords) {
     castBtn.textContent = "🪁 Cần thêm từ vựng trong list này";
   } else if (releasesLeft <= 0) {
     castBtn.textContent = "🪁 Hết lượt thả hôm nay";
-  } else if ((g.bambooPouch || 0) < KITE_COST) {
+  } else if ((g.bambooPouch || 0) < betNow) {
     castBtn.textContent = "🪁 Không đủ Trúc để thả";
   } else {
-    castBtn.textContent = `🪁 Thả Diều (${KITE_COST} 🎋)`;
+    castBtn.textContent = `🪁 Thả Diều (${betNow} 🎋)`;
   }
 }
 
 let _kiteCasting = false;
+let _kiteStake = KITE_COST;
 let _kiteQuestionWord = null;
 
 function castKiteLine() {
@@ -7744,13 +7954,14 @@ function castKiteLine() {
   checkResetKiteDaily();
   const g = state.gamification;
   if (!g) return;
+  const betStake = getBetStake("kite", KITE_COST);
 
   const releasesLeft = Math.max(0, KITE_DAILY_LIMIT - (g.kite.releasesToday || 0));
   if (releasesLeft <= 0) {
     return alert(`Bạn đã dùng hết ${KITE_DAILY_LIMIT} lượt thả diều hôm nay rồi! Hẹn thả tiếp vào ngày mai nhé 🪁`);
   }
-  if ((g.bambooPouch || 0) < KITE_COST) {
-    return alert(`Bạn không đủ Trúc để thả diều! Cần ${KITE_COST} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
+  if ((g.bambooPouch || 0) < betStake) {
+    return alert(`Bạn không đủ Trúc để thả diều! Cần ${betStake} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
   }
   const words = allWords();
   if (words.length < 4) {
@@ -7758,7 +7969,10 @@ function castKiteLine() {
   }
 
   /* Trừ Trúc cược ngay khi thả (giống 4 trò kia), rồi mới ra câu hỏi */
-  g.bambooPouch -= KITE_COST;
+  if (!confirmBigBet("kite", betStake, KITE_COST)) return;
+  _kiteStake = betStake;
+  betSetLock("kite", true);
+  g.bambooPouch -= betStake;
   g.kite.releasesToday = (g.kite.releasesToday || 0) + 1;
   trackMinigamePlayed("kite");
   /* FIX (Trúc bị trừ đúng nhưng vài giây sau tự "hồi" lại số cũ) — xem
@@ -7851,10 +8065,10 @@ function resolveKiteLaunch(seg, isCorrect) {
   const g = state.gamification;
   if (!g) return;
 
-  const bambooBack = Math.round(KITE_COST * seg.mult);
+  const bambooBack = Math.round(_kiteStake * seg.mult);
   g.bambooPouch += bambooBack;
-  const netChange = bambooBack - KITE_COST;
-  g.kite.netTotal = (g.kite.netTotal || 0) + netChange;
+  const netChange = bambooBack - _kiteStake;
+  g.kite.netTotal = (g.kite.netTotal || 0) + betNormNet(netChange, _kiteStake, KITE_COST);
   g.kite.recentResults.push(seg.mult);
   if (g.kite.recentResults.length > 10) g.kite.recentResults.shift();
 
@@ -7879,7 +8093,7 @@ function resolveKiteLaunch(seg, isCorrect) {
     banner.style.display = "block";
   }
 
-  addActivityLog(`🪁 Gấu Trúc của ${state.studentName} vừa thả Diều Tri Thức (${isCorrect ? "trả lời đúng" : "trả lời sai"} từ "${_kiteQuestionWord?.hanzi || ""}"), kết quả "${seg.label}" ${seg.icon} (nhận lại ${bambooBack} 🎋${extraText})!`);
+  addActivityLog(`🪁 Gấu Trúc của ${state.studentName} vừa thả Diều Tri Thức (${isCorrect ? "trả lời đúng" : "trả lời sai"} từ "${_kiteQuestionWord?.hanzi || ""}"), kết quả "${seg.label}" ${seg.icon} (nhận lại ${bambooBack} 🎋${extraText}${betLogTag(_kiteStake, KITE_COST)})!`);
 
   const stage = document.getElementById("kite-stage");
   if (netChange < 0) {
@@ -7898,6 +8112,7 @@ function resolveKiteLaunch(seg, isCorrect) {
   const castBtn = document.getElementById("cast-kite-btn");
   if (castBtn) castBtn.style.display = "";
   _kiteCasting = false;
+  betSetLock("kite", false);
   saveState();
   updateGamificationUI();
   renderKiteModal();
@@ -7978,6 +8193,7 @@ function getActiveFortuneWeights(g) {
 }
 
 function openFortuneModal() {
+  betReset("fortune");
   checkResetFortuneDaily();
   const tube = document.getElementById("fortune-tube");
   const stick = document.getElementById("fortune-stick");
@@ -7997,6 +8213,8 @@ function renderFortuneModal() {
   checkResetFortuneDaily();
   const g = state.gamification;
   if (!g) return;
+  const betNow = getBetStake("fortune", FORTUNE_COST);
+  renderBetPicker("fortune");
   const balEl = document.getElementById("fortune-bamboo-balance");
   if (balEl) balEl.textContent = `${g.bambooPouch || 0} 🎋`;
   const leftEl = document.getElementById("fortune-draws-left");
@@ -8005,33 +8223,35 @@ function renderFortuneModal() {
 
   const drawBtn = document.getElementById("draw-fortune-btn");
   if (drawBtn) {
-    const canDraw = drawsLeft > 0 && (g.bambooPouch || 0) >= FORTUNE_COST;
+    const canDraw = drawsLeft > 0 && (g.bambooPouch || 0) >= betNow;
     drawBtn.disabled = !canDraw;
     drawBtn.style.opacity = canDraw ? "1" : "0.55";
     if (drawsLeft <= 0) {
       drawBtn.textContent = "☯️ Hết lượt bốc hôm nay";
-    } else if ((g.bambooPouch || 0) < FORTUNE_COST) {
+    } else if ((g.bambooPouch || 0) < betNow) {
       drawBtn.textContent = "☯️ Không đủ Trúc để bốc";
     } else {
-      drawBtn.textContent = `☯️ Bốc Xăm (${FORTUNE_COST} 🎋)`;
+      drawBtn.textContent = `☯️ Bốc Xăm (${betNow} 🎋)`;
     }
   }
 }
 
 let _fortuneDrawing = false;
+let _fortuneStake = FORTUNE_COST;
 
 function drawFortuneSlip() {
   if (_fortuneDrawing) return;
   checkResetFortuneDaily();
   const g = state.gamification;
   if (!g) return;
+  const betStake = getBetStake("fortune", FORTUNE_COST);
 
   const drawsLeft = Math.max(0, FORTUNE_DAILY_LIMIT - (g.fortune.drawsToday || 0));
   if (drawsLeft <= 0) {
     return alert(`Bạn đã dùng hết ${FORTUNE_DAILY_LIMIT} lượt bốc xăm hôm nay rồi! Hẹn bốc tiếp vào ngày mai nhé ☯️`);
   }
-  if ((g.bambooPouch || 0) < FORTUNE_COST) {
-    return alert(`Bạn không đủ Trúc để bốc xăm! Cần ${FORTUNE_COST} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
+  if ((g.bambooPouch || 0) < betStake) {
+    return alert(`Bạn không đủ Trúc để bốc xăm! Cần ${betStake} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
   }
 
   const weights = getActiveFortuneWeights(g);
@@ -8039,7 +8259,10 @@ function drawFortuneSlip() {
   const seg = FORTUNE_SLIPS[targetIndex];
 
   /* Trừ Trúc cược ngay khi bốc xăm */
-  g.bambooPouch -= FORTUNE_COST;
+  if (!confirmBigBet("fortune", betStake, FORTUNE_COST)) return;
+  _fortuneStake = betStake;
+  betSetLock("fortune", true);
+  g.bambooPouch -= betStake;
   g.fortune.drawsToday = (g.fortune.drawsToday || 0) + 1;
   trackMinigamePlayed("fortune");
   /* FIX (Trúc bị trừ đúng nhưng vài giây sau tự "hồi" lại số cũ) — xem
@@ -8079,10 +8302,10 @@ function resolveFortuneDraw(seg) {
   const g = state.gamification;
   if (!g) return;
 
-  const bambooBack = Math.round(FORTUNE_COST * seg.mult);
+  const bambooBack = Math.round(_fortuneStake * seg.mult);
   g.bambooPouch += bambooBack;
-  const netChange = bambooBack - FORTUNE_COST;
-  g.fortune.netTotal = (g.fortune.netTotal || 0) + netChange;
+  const netChange = bambooBack - _fortuneStake;
+  g.fortune.netTotal = (g.fortune.netTotal || 0) + betNormNet(netChange, _fortuneStake, FORTUNE_COST);
   g.fortune.recentResults.push(seg.mult);
   if (g.fortune.recentResults.length > 10) g.fortune.recentResults.shift();
 
@@ -8106,7 +8329,7 @@ function resolveFortuneDraw(seg) {
     banner.style.display = "block";
   }
 
-  addActivityLog(`☯️ Gấu Trúc của ${state.studentName} vừa bốc xăm trúng "${seg.label}" ${seg.icon} ở Bốc Xăm Vận May (nhận lại ${bambooBack} 🎋${extraText})!`);
+  addActivityLog(`☯️ Gấu Trúc của ${state.studentName} vừa bốc xăm trúng "${seg.label}" ${seg.icon} ở Bốc Xăm Vận May (nhận lại ${bambooBack} 🎋${extraText}${betLogTag(_fortuneStake, FORTUNE_COST)})!`);
 
   const stage = document.getElementById("fortune-stage");
   if (netChange < 0) {
@@ -8123,6 +8346,7 @@ function resolveFortuneDraw(seg) {
   }
 
   _fortuneDrawing = false;
+  betSetLock("fortune", false);
   saveState();
   updateGamificationUI();
   renderFortuneModal();
@@ -8224,6 +8448,7 @@ function renderPotCluster() {
 }
 
 function openPotModal() {
+  betReset("pot");
   checkResetPotDaily();
   renderPotCluster();
   const stage = document.getElementById("pot-stage");
@@ -8240,13 +8465,15 @@ function renderPotModal() {
   checkResetPotDaily();
   const g = state.gamification;
   if (!g) return;
+  const betNow = getBetStake("pot", POT_COST);
+  renderBetPicker("pot");
   const balEl = document.getElementById("pot-bamboo-balance");
   if (balEl) balEl.textContent = `${g.bambooPouch || 0} 🎋`;
   const leftEl = document.getElementById("pot-smashes-left");
   const smashesLeft = Math.max(0, POT_DAILY_LIMIT - (g.potSmash.smashesToday || 0));
   if (leftEl) leftEl.textContent = `${smashesLeft}/${POT_DAILY_LIMIT}`;
 
-  const canSmash = smashesLeft > 0 && (g.bambooPouch || 0) >= POT_COST;
+  const canSmash = smashesLeft > 0 && (g.bambooPouch || 0) >= betNow;
   document.querySelectorAll(".pot-item").forEach(btn => {
     btn.disabled = !canSmash;
   });
@@ -8256,8 +8483,8 @@ function renderPotModal() {
       banner.textContent = "🏺 Bạn đã hết lượt đập niêu hôm nay rồi! Hẹn quay lại vào ngày mai nhé 🏺";
       banner.style.background = "#FFF8E1"; banner.style.color = "#8D6E00"; banner.style.border = "2px solid #FFE082";
       banner.style.display = "block";
-    } else if ((g.bambooPouch || 0) < POT_COST) {
-      banner.textContent = `🏺 Không đủ Trúc để đập niêu! Cần ${POT_COST} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`;
+    } else if ((g.bambooPouch || 0) < betNow) {
+      banner.textContent = `🏺 Không đủ Trúc để đập niêu! Cần ${betNow} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`;
       banner.style.background = "#FFEBEE"; banner.style.color = "#B71C1C"; banner.style.border = "2px solid #EF9A9A";
       banner.style.display = "block";
     }
@@ -8265,19 +8492,21 @@ function renderPotModal() {
 }
 
 let _potSmashing = false;
+let _potStake = POT_COST;
 
 function smashPot(potBtn) {
   if (_potSmashing) return;
   checkResetPotDaily();
   const g = state.gamification;
   if (!g) return;
+  const betStake = getBetStake("pot", POT_COST);
 
   const smashesLeft = Math.max(0, POT_DAILY_LIMIT - (g.potSmash.smashesToday || 0));
   if (smashesLeft <= 0) {
     return alert(`Bạn đã dùng hết ${POT_DAILY_LIMIT} lượt đập niêu hôm nay rồi! Hẹn đập tiếp vào ngày mai nhé 🏺`);
   }
-  if ((g.bambooPouch || 0) < POT_COST) {
-    return alert(`Bạn không đủ Trúc để đập niêu! Cần ${POT_COST} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
+  if ((g.bambooPouch || 0) < betStake) {
+    return alert(`Bạn không đủ Trúc để đập niêu! Cần ${betStake} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
   }
 
   const weights = getActivePotWeights(g);
@@ -8285,7 +8514,10 @@ function smashPot(potBtn) {
   const seg = POT_REWARDS[targetIndex];
 
   /* Trừ Trúc cược ngay khi đập niêu */
-  g.bambooPouch -= POT_COST;
+  if (!confirmBigBet("pot", betStake, POT_COST)) return;
+  _potStake = betStake;
+  betSetLock("pot", true);
+  g.bambooPouch -= betStake;
   g.potSmash.smashesToday = (g.potSmash.smashesToday || 0) + 1;
   trackMinigamePlayed("potsmash");
   /* FIX (Trúc bị trừ đúng nhưng vài giây sau tự "hồi" lại số cũ) — xem
@@ -8319,10 +8551,10 @@ function resolvePotSmash(seg) {
   const g = state.gamification;
   if (!g) return;
 
-  const bambooBack = Math.round(POT_COST * seg.mult);
+  const bambooBack = Math.round(_potStake * seg.mult);
   g.bambooPouch += bambooBack;
-  const netChange = bambooBack - POT_COST;
-  g.potSmash.netTotal = (g.potSmash.netTotal || 0) + netChange;
+  const netChange = bambooBack - _potStake;
+  g.potSmash.netTotal = (g.potSmash.netTotal || 0) + betNormNet(netChange, _potStake, POT_COST);
   g.potSmash.recentResults.push(seg.mult);
   if (g.potSmash.recentResults.length > 10) g.potSmash.recentResults.shift();
 
@@ -8346,7 +8578,7 @@ function resolvePotSmash(seg) {
     banner.style.display = "block";
   }
 
-  addActivityLog(`🏺 Gấu Trúc của ${state.studentName} vừa đập trúng "${seg.label}" ${seg.icon} ở Đập Niêu Đất (nhận lại ${bambooBack} 🎋${extraText})!`);
+  addActivityLog(`🏺 Gấu Trúc của ${state.studentName} vừa đập trúng "${seg.label}" ${seg.icon} ở Đập Niêu Đất (nhận lại ${bambooBack} 🎋${extraText}${betLogTag(_potStake, POT_COST)})!`);
 
   const stage = document.getElementById("pot-stage");
   if (netChange < 0) {
@@ -8363,6 +8595,7 @@ function resolvePotSmash(seg) {
   }
 
   _potSmashing = false;
+  betSetLock("pot", false);
   saveState();
   updateGamificationUI();
 }
@@ -8376,42 +8609,42 @@ const MINIGAMES = [
     id: "wheel",
     icon: "🎡",
     name: "Vòng Quay Lễ Hội",
-    desc: "Cược 10 🎋 quay vòng may rủi, ăn Trúc/Mị Lực/XP! Tối đa 5 lượt/ngày.",
+    desc: "Cược từ 10 🎋 (nâng x2/x5/All-in) quay vòng may rủi, ăn Trúc/Mị Lực/XP! Tối đa 5 lượt/ngày.",
     action: () => openWheelModal()
   },
   {
     id: "fishing",
     icon: "🎣",
     name: "Câu Cá Trúc",
-    desc: "Thả câu 10 🎋, may rủi trúng loài cá đủ loại. Tối đa 5 lượt/ngày.",
+    desc: "Thả câu từ 10 🎋 (nâng x2/x5/All-in), may rủi trúng loài cá đủ loại. Tối đa 5 lượt/ngày.",
     action: () => openFishingModal()
   },
   {
     id: "lantern",
     icon: "🏮",
     name: "Thả Đèn Lồng Ước Nguyện",
-    desc: "Thả đèn 10 🎋, cầu may cho đèn bay cao hay bay thấp. Tối đa 5 lượt/ngày.",
+    desc: "Thả đèn từ 10 🎋 (nâng x2/x5/All-in), cầu may cho đèn bay cao hay bay thấp. Tối đa 5 lượt/ngày.",
     action: () => openLanternModal()
   },
   {
     id: "kite",
     icon: "🪁",
     name: "Thả Diều Tri Thức",
-    desc: "Trả lời 1 câu từ vựng rồi thả diều 10 🎋 — đúng thì gió thuận, sai thì gió ngược! Tối đa 5 lượt/ngày.",
+    desc: "Trả lời 1 câu từ vựng rồi thả diều từ 10 🎋 (nâng x2/x5/All-in) — đúng thì gió thuận, sai thì gió ngược! Tối đa 5 lượt/ngày.",
     action: () => openKiteModal()
   },
   {
     id: "fortune",
     icon: "☯️",
     name: "Bốc Xăm Vận May",
-    desc: "Bốc xăm 10 🎋, xem vận may hôm nay của em ra sao. Tối đa 5 lượt/ngày.",
+    desc: "Bốc xăm từ 10 🎋 (nâng x2/x5/All-in), xem vận may hôm nay của em ra sao. Tối đa 5 lượt/ngày.",
     action: () => openFortuneModal()
   },
   {
     id: "potsmash",
     icon: "🏺",
     name: "Đập Niêu Đất",
-    desc: "Chọn 1 niêu để đập 10 🎋, may rủi xem niêu chứa gì bên trong. Tối đa 5 lượt/ngày.",
+    desc: "Chọn 1 niêu để đập từ 10 🎋 (nâng x2/x5/All-in), may rủi xem niêu chứa gì bên trong. Tối đa 5 lượt/ngày.",
     action: () => openPotModal()
   }
 ];
@@ -8524,6 +8757,7 @@ function renderMinigamesGrid() {
 }
 
 function openWheelModal() {
+  betReset("wheel");
   checkResetWheelDaily();
   buildWheelSVG();
   const svg = document.getElementById("wheel-svg");
@@ -8548,6 +8782,8 @@ function renderWheelModal() {
   checkResetWheelDaily();
   const g = state.gamification;
   if (!g) return;
+  const betNow = getBetStake("wheel", WHEEL_SPIN_COST);
+  renderBetPicker("wheel");
   const balEl = document.getElementById("wheel-bamboo-balance");
   if (balEl) balEl.textContent = `${g.bambooPouch || 0} 🎋`;
   const leftEl = document.getElementById("wheel-spins-left");
@@ -8556,33 +8792,35 @@ function renderWheelModal() {
 
   const spinBtn = document.getElementById("spin-wheel-btn");
   if (spinBtn) {
-    const canSpin = spinsLeft > 0 && (g.bambooPouch || 0) >= WHEEL_SPIN_COST;
+    const canSpin = spinsLeft > 0 && (g.bambooPouch || 0) >= betNow;
     spinBtn.disabled = !canSpin;
     spinBtn.style.opacity = canSpin ? "1" : "0.55";
     if (spinsLeft <= 0) {
       spinBtn.textContent = "🎡 Hết lượt quay hôm nay";
-    } else if ((g.bambooPouch || 0) < WHEEL_SPIN_COST) {
+    } else if ((g.bambooPouch || 0) < betNow) {
       spinBtn.textContent = "🎡 Không đủ Trúc để quay";
     } else {
-      spinBtn.textContent = `🎡 Quay Ngay (${WHEEL_SPIN_COST} 🎋)`;
+      spinBtn.textContent = `🎡 Quay Ngay (${betNow} 🎋)`;
     }
   }
 }
 
 let _wheelSpinning = false;
+let _wheelStake = WHEEL_SPIN_COST;
 
 function spinLuckyWheel() {
   if (_wheelSpinning) return;
   checkResetWheelDaily();
   const g = state.gamification;
   if (!g) return;
+  const betStake = getBetStake("wheel", WHEEL_SPIN_COST);
 
   const spinsLeft = Math.max(0, WHEEL_DAILY_LIMIT - (g.luckyWheel.spinsToday || 0));
   if (spinsLeft <= 0) {
     return alert(`Bạn đã dùng hết ${WHEEL_DAILY_LIMIT} lượt quay hôm nay rồi! Hẹn quay lại vào ngày mai nhé 🎡`);
   }
-  if ((g.bambooPouch || 0) < WHEEL_SPIN_COST) {
-    return alert(`Bạn không đủ Trúc để quay! Cần ${WHEEL_SPIN_COST} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
+  if ((g.bambooPouch || 0) < betStake) {
+    return alert(`Bạn không đủ Trúc để quay! Cần ${betStake} 🎋 nhưng chỉ có ${g.bambooPouch || 0} 🎋. Hãy làm thêm bài tập để tích Trúc nhé 🎋`);
   }
 
   const weights = getActiveWheelWeights(g);
@@ -8592,7 +8830,10 @@ function spinLuckyWheel() {
   const sliceAngle = 360 / n;
 
   /* Trừ Trúc cược ngay khi bắt đầu quay */
-  g.bambooPouch -= WHEEL_SPIN_COST;
+  if (!confirmBigBet("wheel", betStake, WHEEL_SPIN_COST)) return;
+  _wheelStake = betStake;
+  betSetLock("wheel", true);
+  g.bambooPouch -= betStake;
   g.luckyWheel.spinsToday = (g.luckyWheel.spinsToday || 0) + 1;
   trackMinigamePlayed("wheel");
   /* FIX QUAN TRỌNG (Trúc bị trừ đúng, hiện thông báo lãi/lỗ, nhưng vài
@@ -8657,10 +8898,10 @@ function resolveWheelSpin(seg) {
   const g = state.gamification;
   if (!g) return;
 
-  const bambooBack = Math.round(WHEEL_SPIN_COST * seg.mult);
+  const bambooBack = Math.round(_wheelStake * seg.mult);
   g.bambooPouch += bambooBack;
-  const netChange = bambooBack - WHEEL_SPIN_COST;
-  g.luckyWheel.netTotal = (g.luckyWheel.netTotal || 0) + netChange;
+  const netChange = bambooBack - _wheelStake;
+  g.luckyWheel.netTotal = (g.luckyWheel.netTotal || 0) + betNormNet(netChange, _wheelStake, WHEEL_SPIN_COST);
   g.luckyWheel.recentResults.push(seg.mult);
   if (g.luckyWheel.recentResults.length > 10) g.luckyWheel.recentResults.shift();
 
@@ -8684,7 +8925,7 @@ function resolveWheelSpin(seg) {
     banner.style.display = "block";
   }
 
-  addActivityLog(`🎡 Gấu Trúc của ${state.studentName} vừa quay Vòng Quay Lễ Hội, trúng "${seg.label}" ${seg.icon} (nhận lại ${bambooBack} 🎋${extraText})!`);
+  addActivityLog(`🎡 Gấu Trúc của ${state.studentName} vừa quay Vòng Quay Lễ Hội, trúng "${seg.label}" ${seg.icon} (nhận lại ${bambooBack} 🎋${extraText}${betLogTag(_wheelStake, WHEEL_SPIN_COST)})!`);
 
   const stage = document.getElementById("wheel-stage");
   if (netChange < 0) {
@@ -8701,6 +8942,7 @@ function resolveWheelSpin(seg) {
   }
 
   _wheelSpinning = false;
+  betSetLock("wheel", false);
   saveState();
   updateGamificationUI();
   renderWheelModal();
